@@ -310,7 +310,8 @@ def add_fb2_file(fn, errors):
     to = os.path.join(dir, fileid+'.txt')
     open(to, 'w').write(txt)
     # создаём и записываем html
-    plugins.fb2_to_html(fileid, xml=xml)
+    to = os.path.join(dir, fileid+'.html')
+    plugins.fb2_to_html(to, xml=xml)
     # аннотация
     save_annotation(xml, bookid, fileid)
     # fb2 description

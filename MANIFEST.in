@@ -1,2 +1,3 @@
-include templates/*.html static/* xslt/* schema/* db.sql genres.dump
+include templates/*.html static/* static/images/*
+include xslt/* schema/* db.sql genres.dump
 include librusecimport.py COPYING README MANIFEST.in setup.cfg
