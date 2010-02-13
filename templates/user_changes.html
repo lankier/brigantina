@@ -1,0 +1,31 @@
+$def with (username, blocked, changes, page, numpages)
+$var title: Изменения слеланные пользователем $username
+
+<h1>Изменения слеланные пользователем $username</h1>
+
+$if blocked.isblocked:
+  $if blocked.reason:
+    <p class="error">Пользователь заблокирован по причине "$blocked.reason".</p>
+  $else:
+    <p class="error">Пользователь заблокирован.</p>
+
+$:chunkrender.changes(changes, page, numpages, '/user/'+username+'/changes')
+
+$if access('admin'):
+  $if blocked.isblocked:
+    <form action="/blockuser" method="POST">
+    <input name="username" value="$username" type="hidden">
+    <input name="action" value="unblock" type="hidden">
+    <input name="reason" type="hidden">
+    <button name="submit"
+    type="submit"><span style="color:green">Разблокировать пользователя
+    $username</span></button>
+    </form>
+  $else:
+    <form action="/blockuser" method="POST">
+    <input name="username" value="$username" type="hidden">
+    <input name="action" value="block" type="hidden">
+    <label>Причина:</label> <input name="reason"><br/>
+    <button name="submit" type="submit"><span style="color:red">Заблокировать
+    пользователя $username</span></button>
+    </form>

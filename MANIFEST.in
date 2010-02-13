@@ -1,0 +1,2 @@
+include templates/*.html static/* xslt/* schema/* db.sql genres.dump
+include librusecimport.py reset.sh

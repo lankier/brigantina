@@ -1,0 +1,12 @@
+$def with (bookid, back, addurl, authors)
+$var title: Добавление автора
+$if not authors:
+  <p>Не найдено ни одного автора удовлетворяющего запросу.<p>
+$else:
+  <p>Найдены следующие авторы. Ткните, если это то что нужно.<p><ul>
+  $for a in authors:
+    <li><a href="$back$bookid$addurl$a.id">$authorname(a)</a>
+    [<a href="/author/$a.id/" target="_blank">посмотреть</a>]</li>
+  </ul>
+<p><a href="$back$bookid">Вернуться</a> к редактированию.</p>
+

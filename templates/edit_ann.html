@@ -1,0 +1,10 @@
+$def with (bookid, ann='', err='')
+$var title: Изменить аннотацию
+<h1>Изменить аннотацию</h1>
+$if err: <p class="error">$err</p>
+<form method="POST">
+  <textarea name="annotation" cols="72" rows="12">$ann</textarea><br/>
+  <input name="astext" type="checkbox">Простой текст</input><br/>
+  <button name="submit" type="submit" id="submit">Отправить</button>
+</form>
+<p><a href="/editbook/$bookid">Вернуться</a> на страницу редактирования книги.</p>

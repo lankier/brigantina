@@ -1,0 +1,17 @@
+$def with (genre, page, numpages, count)
+$var title: Жанр $genre.description
+
+$if context.message:
+  <div class="message">$context.message</div>
+
+<h1>Книги в жанре $genre.description</h1>
+
+<p>Всего $count книг</p>
+<form method="POST" action="/download">
+$for b in genre.books:
+  $:chunkrender.book_item(b)
+$:chunkrender.paging(page, numpages)
+$if access('many_download'):
+  <button name="submit" type="submit" id="submit">Скачать всё выбранное</button>
+<input name="back" value="/genre/$genre.id?page=$page" type="hidden">
+</form>

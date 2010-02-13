@@ -1,0 +1,9 @@
+$def with (author)
+$var title: Редактировать биографию
+<h1>Редактировать биографию автора $authorname(author)</h1>
+<form method="POST">
+  <textarea name="biography" cols="72" rows="12">$author.biography</textarea><br/>
+  <input name="astext" type="checkbox">Простой текст</input><br/>
+  <button name="submit" type="submit" id="submit">Отправить</button>
+</form>
+<p><a href="/editauthor/$author.id">Вернуться</a> на страницу редактирования автора.</p>

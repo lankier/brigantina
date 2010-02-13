@@ -1,0 +1,15 @@
+$def with (username, reviews)
+$var title: Отзывы пользователя $username
+<h1>Отзывы пользователя $username</h1>
+$for r in reviews:
+  <div class="review">
+  $:chunkrender.book_info(r.book)
+  <span class="reviewtime">$strtime(r.ctime, 'sec')
+  $if r.ctime != r.mtime:
+    <em>(изменено $strtime(r.mtime, 'sec'))</em>
+  $if r.username == context.username:
+    | <a href="/editreview/$r.id">Изменить</a>
+  </span>
+  <br />
+  $:r.html
+  </div>

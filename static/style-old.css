@@ -1,0 +1,20 @@
+.message {
+    background: #dcffdf;
+    border: 1px solid black;
+    color: #35772b;
+    margin-top: 16px;
+    margin-bottom: 16px;
+    padding: 10px;
+}
+.error {
+    font-weight: bold;
+    color: red;
+}
+.changes {
+    border-collapse: collapse;
+    border: 1px;
+}
+.changes td, th {
+    border: 1px solid black;
+    padding: 4px;
+}

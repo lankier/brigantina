@@ -1,0 +1,121 @@
+$def with (book)
+$var title: Редактировать книгу $book.title
+$:chunkrender.page_tab(book.id, 'book', 'edit')
+
+<h1>$book.title</h1>
+
+$if context.message:
+  <div class="message">$context.message</div>
+
+$if access('admin'):
+  <form method="POST" action="/editbook/$book.id/block">
+  $if book.permission == 0:
+    <button name="submit" type="submit">Заблокировать книгу</button>
+  $else:
+    <button name="submit" type="submit">Разблокировать книгу</button>
+  </form>
+
+<form method="POST" action="/editbook/$book.id/settitle">
+<b>Название:</b> <input name="title" value="$book.title">
+<button name="submit" type="submit">Сохранить название</button>
+</form>
+
+<form method="POST" action="/editbook/$book.id/setyear">
+<b>Год:</b> <input name="year" value="$book.year">
+<button name="submit" type="submit">Сохранить год</button>
+</form>
+
+<form method="POST" action="/editbook/$book.id/setlang">
+<b>Оригинальный язык произведения:</b> <input name="lang" value="$book.lang">
+<button name="submit" type="submit">Сохранить язык</button>
+</form>
+
+<h3>Другие названия книги</h3>
+$if book.alttitles:
+  <ul>
+  $for t in book.alttitles:
+    <li><form action="/editbook/$book.id/delalttitle" method="POST">
+    $t.title
+    <input name="titleid" value="$t.id" type="hidden">
+    <button name="submit" type="submit">Удалить название</button>
+    </form></li>
+  </ul>
+<form action="/editbook/$book.id/addalttitle" method="POST">
+  <button name="submit" type="submit">Добавить название</button>
+</form>
+
+<h3>Жанры</h3>
+<ul>
+$for g in book.genres:
+  <li><form action="/editbook/$book.id/delgenre" method="POST">
+  <a href="/genre/$g.id">$g.description</a>
+  <input name="genreid" value="$g.id" type="hidden">
+  <button name="submit" type="submit">Удалить жанр</button>
+  </form></li>
+</ul>
+<form action="/editbook/$book.id/addgenre" method="POST">
+  <button name="submit" type="submit">Добавить жанр</button>
+</form>
+
+<h3>Авторы</h3>
+<ul>
+$for a in book.authors:
+  <li><form action="/editbook/$book.id/delauthor" method="POST">
+  <a href="/author/$a.id">$authorname(a)</a>
+  <input name="authorid" value="$a.id" type="hidden">
+  <button name="submit" type="submit">Удалить автора</button>
+  </form></li>
+</ul>
+<form action="/editbook/$book.id/addauthor" method="POST">
+  <button name="submit" type="submit">Добавить автора</button>
+</form>
+
+<h3>Файлы</h3>
+<ul>
+$for f in book.files:
+  <li><form action="/editbook/$book.id/delfile" method="POST">
+  <a href="/file/$f.id">$f.title</a>
+  <input name="fileid" value="$f.id" type="hidden">
+  $if f.hidden:
+    <button name="hide" type="submit">Показывать</button>
+  $else:
+    <button name="hide" type="submit">Спрятать</button>
+  <button name="delete" type="submit">Удалить</button> (разорвать связь файла
+  с данной книгой)
+  </form></li>
+</ul>
+<form action="/editbook/$book.id/addfile" method="POST">
+  <button name="submit" type="submit">Добавить файл</button> (добавляется файл
+  <b>уже существующий</b> в библиотеке)<br/>
+</form>
+<p><a href="/book/$book.id/upload">Залить новый файл</a></p>
+
+<h3>Авторские сериалы</h3>
+$if book.sequences:
+  <ul>
+  $for s in book.sequences:
+    <li><form action="/editbook/$book.id/delsequence" method="POST">
+    <a href="/sequence/$s.id">$s.name</a> - $s.number
+    <input name="sequenceid" value="$s.id" type="hidden">
+    <button name="submit" type="submit">Удалить сериал</button>
+    </form></li>
+  </ul>
+<form action="/editbook/$book.id/addsequence" method="POST">
+  <button name="submit" type="submit">Добавить сериал</button>
+</form>
+
+<h3>Обложки</h3>
+<ul>
+$for c in book.covers:
+  <li>$c.fileid / $c.filename</li>
+</ul>
+$for c in book.covers:
+  <img src="/cover/$c.fileid" alt="Cover">
+
+<h3>Аннотация</h3>
+$:book.annotation
+<form action="/editbook/$book.id/editann" method="POST">
+  <button name="submit" type="submit">Редактировать аннотацию</button>
+</form>
+
+<h3><a href="/editbook/$book.id/join">Объединить с другой книгой</a></h3>

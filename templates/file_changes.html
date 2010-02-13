@@ -1,0 +1,6 @@
+$def with (fileid, changes, page, numpages)
+$var title: Последние изменения
+$:chunkrender.page_tab(fileid, 'file', 'history')
+
+<h1>Последние изменения</h1>
+$:chunkrender.changes(changes, page, numpages, '/filehistory/'+fileid)

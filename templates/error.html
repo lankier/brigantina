@@ -1,0 +1,6 @@
+$def with (title, err, back=None)
+$var title: $title
+<h1>$title</h1>
+<p class="error">$err</p>
+$if back:
+  <p><a href="$back">Вернуться</a></p>

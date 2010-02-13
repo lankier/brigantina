@@ -1,0 +1,17 @@
+$def with (author)
+$var title: Автор $authorname(author)
+$:chunkrender.page_tab(author.id, 'author', '')
+
+$if context.message:
+  <div class="message">$context.message</div>
+
+<h1>$authorname(author)</h1>
+
+$if author.biography:
+  <h3>Биография</h3>
+  <div class="biography">
+  $:author.biography
+  </div>
+
+$:chunkrender.books_by_sequence(author)
+$:chunkrender.reviews(author.reviews, use_rating=False, h='Мнения об авторе')

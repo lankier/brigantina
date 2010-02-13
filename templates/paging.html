@@ -1,0 +1,5 @@
+$def with (page, numpages, left='Более новые', right='Более старые')
+<p>Страница $page из $numpages
+$if page > 1: | <a href="?page=$(page-1)">$left</a>
+$if page < numpages: | <a href="?page=$(page+1)">$right</a>
+</p>

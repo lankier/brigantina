@@ -1,0 +1,23 @@
+.epigraph {
+  width:65%;
+  margin-left: 35%;
+}
+.paragraph {
+  text-align: justify;
+  text-indent: 1em;
+  margin-left: 0px;
+  margin-top: 5px;
+  margin-right: 0px;
+  margin-bottom: 0px;
+  /*line-height: 110%;*/
+}
+.poem {
+  margin: 0 1em 0.2em 4em;
+}
+.cite {
+  margin: 0 1em 0.2em 4em;
+}
+.annotation {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}

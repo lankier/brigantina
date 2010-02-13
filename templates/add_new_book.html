@@ -1,0 +1,25 @@
+$def with (genres, input={}, err='')
+$var title: Создать новую книгу
+<h1>Создать новую книгу</h1>
+
+$if err:
+  <p class="error">$err</p>
+
+<form method="POST">
+  <label for="title">Название:</label>
+  <input type="text" name="title" value="$input.get('title', '')"><br/>
+  <label for="genre">Жанр:</label>
+  <select id="genre" name="genre">
+$for g in genres: <option value="$g.id">$g.description ($g.id)</option>
+  </select><br/>
+  <h4>Автор</h4>
+  <span style="color:#888">Если такого автора не существует, он будет
+  создан</span><br/>
+  <label for="firstname">Имя:</label>
+  <input type="text" name="firstname" value="$input.get('firstname', '')"><br/>
+  <label for="lastname">Фамилия:</label>
+  <input type="text" name="lastname" value="$input.get('lastname', '')"><br/>
+  <button name="submit" type="submit" id="submit">Отправить</button>
+</form>
+
+

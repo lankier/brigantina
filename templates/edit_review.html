@@ -1,0 +1,9 @@
+$def with (review)
+$var title: Изменить отзыв
+<h1>Изменить отзыв</h1>
+<form method="POST">
+  <textarea name="review" cols="72" rows="12">$review.body</textarea><br/>
+  <input name="astext" type="checkbox">Простой текст</input><br/>
+  <button name="submit" type="submit" id="submit">Отправить</button>
+</form>
+<p><a href="/book/$review.bookid">Вернуться</a> на страницу книги.</p>

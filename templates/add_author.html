@@ -1,0 +1,9 @@
+$def with (bookid)
+$var title: Добавить автора
+<h1>Добавить автора</h1>
+<form method="POST">
+  <label for="author">Id или фамилия автора:</label>
+  <input type="text" name="author"/>
+  <button name="submit" type="submit">Отправить</button>
+</form>
+<p><a href="/editbook/$bookid">Вернуться</a> на страницу редактирования книги.</p>

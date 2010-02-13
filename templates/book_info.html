@@ -1,0 +1,9 @@
+$def with (book)
+<a href="/book/$book.id">$book.title</a> &mdash;
+$ a = book.authors[0]
+<a href="/author/$a.id">$authorname(a)</a>
+(\
+$for g in book.genres
+  <a href="/genre/$g.id">$g.description</a>\
+  $if not loop.last: ,
+)

@@ -1,0 +1,15 @@
+$def with (books, sequencenumber=False, alttitles=False)
+$for b in books:
+  <li>
+  $if sequencenumber:
+    $(b.sequencenumber).
+  $if alttitles:
+    $b.alttitle (другое название для \
+  <a href="/book/$b.id">$b.title</a>
+  $if b.authors:
+    &mdash;
+    $ a = b.authors[0]
+    <a href="/author/$a.id">$authorname(a)</a>\
+  $if alttitles:
+    )
+  </li>

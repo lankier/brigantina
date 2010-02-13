@@ -1,0 +1,8 @@
+$def with (changes, page, numpages)
+$var title: Последние изменения
+<h1>Последние изменения в списке наблюдения</h1>
+$if changes is None:
+  <p>Пусто.</p>
+$else:
+  $:chunkrender.changes(changes, page, numpages)
+  <p><a href="/viewwatchlist">Смотреть</a> список наблюдения.</p>

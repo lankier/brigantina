@@ -1,0 +1,13 @@
+$def with (files, page, numpages)
+$var title: Новые файлы
+<h1>Новые файлы в библиотеке</h1>
+$ prev_date = None
+$for f in files:
+  $ date = strtime(f.added, 'day')
+  $if date != prev_date:
+    $if prev_date: </ul>
+    <h3>$date</h3><ul>
+    $ prev_date = date
+  <li><a href="/file/$f.id">$f.title</a></li>
+</ul>
+$:chunkrender.paging(page, numpages)

@@ -1,0 +1,12 @@
+$def with (bookid, books)
+$var title: Добавление автора
+$if not books:
+  <p>Не найдено ни одной книги удовлетворяющей запросу.<p>
+$else:
+  <p>Найдены следующие книги. Ткните, если это то что нужно.<p><ul>
+  $for b in books:
+    <li><a href="/editbook/$bookid/join/$b.id">$b.title</a>
+    [<a href="/book/$b.id" target="_blank">посмотреть</a>]</li>
+  </ul>
+<p><a href="/editbook/$bookid">Вернуться</a> на страницу редактирования книги.</p>
+

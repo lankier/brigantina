@@ -1,0 +1,8 @@
+$def with (file)
+$var title: Ошибки файла $file.title
+<h1>Ошибки файла $file.title</h1>
+<div>
+$for s in file.errors.splitlines():
+  $s<br/>
+</div>
+<p><a href="/file/$file.id">Вернуться</a> на страницу файла</p>

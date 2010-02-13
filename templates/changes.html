@@ -1,0 +1,30 @@
+$def with (changes, page, numpages, back='')
+<table id="changes">
+<tr><th>Дата</th><th>Автор правки</th><th>Затронутые страницы</th>
+<th>Действие</th><th>Старое значение</th></tr>
+$for ch in changes:
+  <tr><td>$strtime(ch.ctime, 'sec')</td>
+  $if ch.hideusername and not access('admin'):
+    <td>unknown</td>
+  $else:
+    <td><a href="/user/$ch.username/changes">$ch.username</td>
+  <td>
+  $for desc, url, id, title in ch.pages:
+    $desc <a href="$url">$title</a><br>
+  </td><td>$ch.action</td>
+  <td>
+  $if ch.valuechanged:
+    $if back:
+      $ b = '?back='+back
+    $else:
+      $ b = ''
+    <a href="/viewoldvalue/$ch.id" title="$ch.oldvalue">$ch.oldvalue[:40]</a><br />
+    <form action="/undo/$ch.id$b" method="POST">
+    <button name="submit" type="submit">Отменить</button>
+    </form>
+  </td></tr>
+</table>
+<p>Страница $page из $numpages
+$if page > 1: | <a href="?page=$(page-1)">Более новые</a>
+$if page < numpages: | <a href="?page=$(page+1)">Более старые</a>
+</p>

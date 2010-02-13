@@ -1,0 +1,9 @@
+$def with (file)
+$var title: FB2 description файла $file.title
+<h1>FB2 description файла $file.title</h1>
+<div>
+$for s in file.desc.splitlines():
+  $ n, t = s.split(':', 1)
+  <b>$n</b>: $t<br/>
+</div>
+<p><a href="/file/$file.id">Вернуться</a> на страницу файла</p>

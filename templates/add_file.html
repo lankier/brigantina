@@ -1,0 +1,9 @@
+$def with (bookid)
+$var title: Добавить файл
+<h1>Добавить файл</h1>
+<form method="POST">
+  <label for="file">Id или заголовок файла:</label>
+  <input type="text" name="file"/>
+  <button name="submit" type="submit">Отправить</button>
+</form>
+<p><a href="/editbook/$bookid">Вернуться</a> на страницу редактирования книги.</p>

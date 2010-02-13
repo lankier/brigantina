@@ -1,0 +1,26 @@
+$def with (itemid, itemname, current)
+$ access_what = 'edit_'+itemname
+$ view_url = itemname
+$ edit_url = 'edit'+itemname
+$ history_url = itemname+'history'
+$ watch_url = 'watch/'+itemname
+<div class="tabs"><ul class="tabs primary">
+$if current == '':
+  <li class="active">Смотреть</li>
+$else:
+  <li><a href="/$view_url/$itemid">Смотреть</a></li>
+$if access(access_what, itemid):
+  $if current == 'edit':
+    <li class="active">Редактировать</li>
+  $else:
+    <li><a href="/$edit_url/$itemid">Редактировать</a></li>
+$if current == 'history':
+  <li class="active">История изменений</li>
+$else:
+  <li><a href="/$history_url/$itemid">История изменений</a></li>
+$if context.username:
+  $if is_watched(itemname, itemid):
+    <li><a href="/$watch_url/$itemid">Не следить</a></li>
+  $else:
+    <li><a href="/$watch_url/$itemid">Следить</a></li>
+</ul></div>

@@ -1,0 +1,132 @@
+body {
+  background-color: #E0E0E0;
+  color: black;
+  /*font-family: "Times New Roman", Verdana, Geneva, Arial, Helvetica, sans-serif;*/
+  font-size: large;
+  text-align: justify;
+}
+h1 {
+  font-size: 160%;
+  font-style: normal;
+  font-weight: bold;
+  text-align: center;
+  border: 1px solid black;
+  background-color: #E7E7E7;
+  margin-left: 0px;
+  padding-left: 0.5em;
+}
+h2 {
+  font-size: 130%;
+  font-style: normal;
+  font-weight: bold;
+  text-align: center;
+  background-color: #EEEEEE;
+  border: 1px solid gray;
+  padding-left: 1em;
+}
+h3 {
+  font-size: 110%;
+  font-style: normal;
+  font-weight: bold;
+  text-align: center;
+  background-color: #F1F1F1;
+  border: 1px solid silver;
+  padding-left: 1.5em;
+}
+h4 {
+  font-size: 100%;
+  font-style: normal;
+  font-weight: bold;
+  text-align: center;
+  padding-left: 0.5em;
+  border: 1px solid gray;
+  background-color: #F4F4F4;
+  padding-left: 2em;
+}
+h5 {
+  font-size: 100%;
+  font-style: italic;
+  font-weight: bold;
+  text-align: center;
+  border: 1px solid gray;
+  background-color: #F4F4F4;
+  padding-left: 2.5em;
+  padding-right: 2.5em;
+}
+h6 {
+  font-size: 100%;
+  font-style: italic;
+  font-weight: normal;
+  text-align: center;
+  border: 1px solid gray;
+  background-color: #F4F4F4;
+  padding-left: 2.5em;
+}
+small {
+  font-size: 80%;
+}
+hr {
+  color: black;
+}
+ul {
+  padding-left: 1em;
+  margin-left: 0;
+}
+.epigraph {
+  width:50%;
+  margin-left: 35%;
+}
+.paragraph {
+  text-align: justify;
+  text-indent: 1em;
+  margin-left: 0px;
+  margin-top: 5px;
+  margin-right: 0px;
+  margin-bottom: 0px;
+  line-height: 110%;
+}
+.poem {
+  margin: 0 1em 0.2em 4em;
+}
+.cite {
+  margin: 0 1em 0.2em 4em;
+}
+
+@media print {
+  body {
+    background-color: white;
+    color: black;
+    font-family: "Times New Roman", Times, serif;
+    text-align: justify;
+  }
+  h1 {
+    font-size: 160%;
+    font-style: normal;
+    font-weight: bold;
+    text-align: left;
+  }
+  h2 {
+    font-size: 130%;
+    font-style: normal;
+    font-weight: bold;
+    text-align: left;
+  }
+  h3 {
+    font-size: 110%;
+    font-style: normal;
+    font-weight: bold;
+    text-align: left;
+  }
+  h4 {
+    font-size: 100%;
+    font-style: normal;
+    font-weight: bold;
+    text-align: left;
+  }
+  h5,h6 {
+    font-size: 100%;
+    font-style: italic;
+    font-weight: normal;
+    text-align: left;
+  }
+}

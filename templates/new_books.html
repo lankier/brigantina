@@ -1,0 +1,17 @@
+$def with (books, page, numpages)
+$var title: Новые книги
+<h1>Новые книги в библиотеке</h1>
+$ prev_date = None
+<form method="POST" action="/download">
+$for b in books:
+  $ date = strtime(b.created, 'day')
+  $if date != prev_date:
+    $if prev_date: </ul>
+    <h3>$date</h3><ul>
+    $ prev_date = date
+  $:chunkrender.book_item(b)
+$:chunkrender.paging(page, numpages)
+$if access('many_download'):
+  <button name="submit" type="submit" id="submit">Скачать всё выбранное</button>
+<input name="back" value="/newbooks?page=$page" type="hidden">
+</form>

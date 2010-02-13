@@ -1,0 +1,29 @@
+$def with (author)
+$ books = author.books
+$if not books:
+  $return
+<form method="POST" action="/download">
+$# предыдущий сериал
+$ prevsequence = None
+$for b in books:
+  $if b.sequenceid != prevsequence:
+    $if prevsequence is not None:
+      $# закрываем предыдущий сериал
+      </div>
+    $if b.sequenceid:
+      $# открываем сериал
+      <div class="seqdesc"><h4><a href="/sequence/$b.sequenceid">$b.sequencename</a></h4>
+    $else:
+      $# или просто список файлов
+      <div>
+  $ prevsequence = b.sequenceid
+  $# выводим книгу
+  $:chunkrender.book_item(b)
+$# закрываем теги
+$if prevsequence:
+  </div>
+</div>
+$if access('many_download'):
+  <button name="submit" type="submit" id="submit">Скачать всё выбранное</button>
+<input name="back" value="/author/$author.id" type="hidden">
+</form>

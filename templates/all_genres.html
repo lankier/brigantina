@@ -1,0 +1,19 @@
+$def with (genres)
+$var title: Жанры
+<h1>Жанры</h1>
+$ n = 1
+<ul>
+$for meta, glist in genres:
+  <li><a href="#m$n">$meta</a></li>
+  $ n += 1
+</ul>
+<hr />
+$ n = 1
+<ul>
+$for meta, glist in genres:
+  <li id="m$n">$meta<ul>
+  $for id, desc in glist:
+    <li><a href="/genre/$id">$desc</a></li>
+  </ul></li>
+  $ n += 1
+</ul>

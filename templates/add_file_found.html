@@ -1,0 +1,12 @@
+$def with (bookid, files)
+$var title: Добавление автора
+$if not files:
+  <p>Не найдено ни одного файла удовлетворяющего запросу.<p>
+$else:
+  <p>Найдены следующие файлы. Ткните, если это то что нужно.<p><ul>
+  $for f in files:
+    <li><a href="/editbook/$bookid/addfile/$f.id">$f.title</a>
+    [<a href="/file/$f.id" target="_blank">посмотреть</a>]</li>
+  </ul>
+<p><a href="/editbook/$bookid">Вернуться</a> на страницу редактирования книги.</p>
+

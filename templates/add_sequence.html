@@ -1,0 +1,11 @@
+$def with (itemid, back, err='')
+$var title: Добавление сериала
+<h1>Добавление сериала</h1>
+$if err: <p class="error">$err</p>
+<form method="POST">
+  <label for="sequencename">Сериал:</label>
+  <input type="text" size="2" name="sequencenumber">
+  <input type="text" name="sequencename">
+  <button name="submit" type="submit">Отправить</button>
+</form>
+<p><a href="$back$itemid">Вернуться</a> к редактированию.</p>

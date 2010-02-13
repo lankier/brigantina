@@ -1,0 +1,4 @@
+$def with (changes, page, numpages)
+$var title: Последние изменения
+<h1>Последние изменения</h1>
+$:chunkrender.changes(changes, page, numpages, '/recentchanges')

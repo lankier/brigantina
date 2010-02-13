@@ -1,0 +1,6 @@
+$def with (bookid, changes, page, numpages)
+$var title: Последние изменения
+$:chunkrender.page_tab(bookid, 'book', 'history')
+
+<h1>Последние изменения</h1>
+$:chunkrender.changes(changes, page, numpages, '/bookhistory/'+bookid)

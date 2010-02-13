@@ -1,0 +1,19 @@
+$def with (added)
+$var title: Загрузка файлов
+<h1>Загрузка файлов</h1>
+$for f in added:
+  <h2>Обрабатывается файл $f.filename</h2>
+  $if f.error:
+    <p class="error">$f.error</p>
+    <p class="error">Файл не добавлен</p>
+  $else:
+    $if f.validation_errors:
+      <h3>Ошибки валидации</h3>
+      $for err in f.validation_errors:
+        <p class="error">$err</p>
+    $if f.newbook:
+      <p><a href="/editfile/$f.fileid" target="_blank">Файл</a> добавлен в
+      <a href="/editbook/$f.bookid" target="_blank">новую книгу</a>.</p>
+    $else:
+      <p><a href="/editfile/$f.fileid" target="_blank">Файл</a> добавлен в
+      <a href="/editbook/$f.bookid" target="_blank">существующую книгу</a>.</p>

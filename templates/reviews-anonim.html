@@ -1,0 +1,38 @@
+$def with (reviews, rating=None, use_rating=True, h='Отзывы читателей')
+$if reviews:
+  <h3>$h</h3>
+$for r in reviews:
+  <div class="review">
+  <strong><a href="/user/$r.username">$r.username</a></strong>
+  <span class="reviewtime">| $strtime(r.ctime, 'sec')
+  $if r.ctime != r.mtime:
+    <em>(изменено $strtime(r.mtime, 'sec'))</em>
+  $if r.username == context.username:
+    | <a href="/editreview/$r.id">Изменить</a>
+    | <a href="/deletereview/$r.id">Удалить</a>
+  </span>
+  <br />
+  $:r.html
+  </div>
+$if context.username:
+  $if use_rating:
+    <form method="POST">
+    <label for="rating">Оценка:</label>
+    <select id="rating" name="rating">
+    $for i in ["", 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]:
+      $if rating == i: <option selected value="$i">$i</option>
+      $else: <option value="$i">$i</option>
+    </select>
+    <button name="submit" type="submit" id="submit">Отправить</button>
+    </form>
+<form method="POST">
+$if not context.username:
+  <label for="username">Имя пользователя:</label>
+  <input type="text" name="username" id="username">
+  <label for="password">Пароль:</label>
+  <input type="password" name="password" id="password"><br/>
+<label for="review">Отзыв:</label><br/>
+<textarea id="review" name="review" cols="64" rows="8"></textarea><br/>
+<input name="astext" type="checkbox">Простой текст</input><br/>
+<button name="submit" type="submit" id="submit">Отправить</button>
+</form>

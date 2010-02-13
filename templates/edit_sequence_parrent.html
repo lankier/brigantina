@@ -1,0 +1,38 @@
+$def with (sequence)
+$var title: Редактировать сериал $sequence.name
+$:chunkrender.page_tab(sequence.id, 'sequence', 'edit')
+
+<h1>$sequence.name</h1>
+
+$if context.message:
+  <div class="message">$context.message</div>
+
+<form method="POST" action="/editsequence/$sequence.id/setname">
+<b>Название:</b> <input name="name" value="$sequence.name">
+<button name="submit" type="submit">Сохранить название</button>
+</form>
+
+<h3>Родительский сериал</h3>
+
+$if sequence.parrent:
+  <form method="POST" action="/editsequence/$sequence.id/delparrent">
+  <a href="/sequence/$sequence.parrent.id">$sequence.parrent.name</a> №$sequence.number
+  <button name="delete" type="submit">Удалить</button>
+  </form>
+$else:
+  <form method="POST" action="/editsequence/$sequence.id/setparrent">
+  <button name="submit" type="submit">Добавить родительский сериал</button>
+  </form>
+
+<h3>Книги</h3>
+
+<ul>
+$for b in sequence.books:
+  <li><form method="POST" action="/editsequence/$sequence.id/setnumber/$b.id">
+  <a href="/book/$b.id">$b.title</a> &mdash; \
+  $ a = b.authors[0]
+  <a href="/author/$a.id">$authorname(a)</a> \
+  <input type="text" size="2" name="sequencenumber" value="$b.sequencenumber">
+  <button name="submit" type="submit">Сохранить</button>
+  </form></li>
+</ul>

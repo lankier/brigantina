@@ -1,0 +1,51 @@
+$def with (book, download=True)
+$if not access('many_download'):
+  $ download = False
+$# выводим книгу
+<div class="bookdesc">
+$if 'sequenceid' in book and book.sequenceid:
+  $if book.sequencenumber:
+    $(book.sequencenumber). \
+<b><a href="/book/$book.id">$book.title</a></b>
+$# автор (один)
+$if 'authors' in book:
+  &mdash;
+  $ a = book.authors[0]
+  <a href="/author/$a.id">$authorname(a)</a>\
+$# жанры
+$if 'genres' in book:
+  (\
+  $for g in book.genres
+    <a href="/genre/$g.id">$g.description</a>\
+    $if not loop.last: ,
+  )
+$# аннотация
+$if 'annotation' in book:
+  $:book.annotation
+$# файлы
+$if 'files' in book and book.files:
+  <ul>
+  $for f in book.files:
+    $if download:
+      <input name="file_$f.id" type="checkbox"></input>
+    $else:
+      <img src="/static/images/menu-leaf.gif"/>
+    $# переводчики
+    $if 'translators' in f and f.translators:
+      (пер:
+      $for tr in f.translators:
+        <a href="/author/$tr.id">$authorname(tr)</a>\
+        $if not loop.last: ,
+      )
+    $if f.title == book.title:
+      скачать  ($strsize(f.textsize)):
+    $else:
+      скачать $f.title ($strsize(f.textsize)):
+    $if f.filetype == 'fb2':
+      $for ff in fb2_formats:
+        <a href="/download/$f.id/$ff">$ff</a> |
+      <a href="/read/$f.id">читать</a>
+    $else: <a href="/download/$f.id/orig">$f.filetype</a>
+    $if not loop.last: <br />
+  </ul>
+</div>

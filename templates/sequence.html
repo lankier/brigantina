@@ -1,0 +1,16 @@
+$def with (sequence)
+$var title: Сериал $sequence.name
+$:chunkrender.page_tab(sequence.id, 'sequence', '')
+
+$if context.message:
+  <div class="message">$context.message</div>
+
+<h1>$sequence.name</h1>
+
+<form method="POST" action="/download">
+$for b in sequence.books:
+  $:chunkrender.book_item(b)
+$if access('many_download'):
+  <button name="submit" type="submit" id="submit">Скачать всё выбранное</button>
+<input name="back" value="/sequence/$sequence.id" type="hidden">
+</form>

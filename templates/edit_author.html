@@ -1,0 +1,44 @@
+$def with (author)
+$var title: Автор $authorname(author)
+$:chunkrender.page_tab(author.id, 'author', 'edit')
+
+<h1>$authorname(author)</h1>
+
+$if context.message:
+  <div class="message">$context.message</div>
+
+<form method="POST" action="/editauthor/$author.id/setname">
+<b>Имя:</b> <input name="firstname" value="$author.firstname">
+<button name="submit" type="submit">Сохранить имя</button>
+</form>
+<form method="POST" action="/editauthor/$author.id/setname">
+<b>Отчество:</b> <input name="middlename" value="$author.middlename">
+<button name="submit" type="submit">Сохранить отчество</button>
+</form>
+<form method="POST" action="/editauthor/$author.id/setname">
+<b>Фамилия:</b> <input name="lastname" value="$author.lastname">
+<button name="submit" type="submit">Сохранить фамилию</button>
+</form>
+<form method="POST" action="/editauthor/$author.id/setname">
+<b>Псевдоним:</b> <input name="nickname" value="$author.nickname">
+<button name="submit" type="submit">Сохранить псевдоним</button>
+</form>
+
+<h3>Другие имена автора</h3>
+$for a in author.aliases:
+  <form method="POST" action="/editauthor/$author.id/delalias/$a.id">
+  <b>$authorname(a)</b>
+  <button name="submit" type="submit">Удалить</button>
+  </form>
+<form method="POST" action="/editauthor/$author.id/addalias">
+<button name="submit" type="submit">Добавить алиас</button>
+
+
+<h3>Биография</h3>
+<div class="biography">
+$:author.biography
+</div>
+$if author.biography:
+  <p><a href="/editauthor/$author.id/biography">Изменить биографию</a></p>
+$else:
+  <p><a href="/editauthor/$author.id/biography">Добавить биографию</a></p>

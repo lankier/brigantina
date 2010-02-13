@@ -1,0 +1,101 @@
+$def with (content)
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+  <title>$content.title - Бригантина</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon" />
+  <link rel="stylesheet" type="text/css" href="/static/system.css" media="screen"/>
+  <link rel="stylesheet" type="text/css" href="/static/style.css" media="screen"/>
+  <link rel="stylesheet" type="text/css" href="/static/layout.css" media="screen"/>
+  <link rel="stylesheet" type="text/css" href="/static/site.css" media="screen"/>
+  <link rel="stylesheet" type="text/css" href="/static/book.css" media="screen"/>
+</head>
+<body>
+  <div id="page">
+    <div id="header">
+      <div id="logo-title">
+          <a href="/" title="Home">
+            <img src="/static/logo.png" alt="" id="logo" />
+          </a>
+          <h1 id='site-name'>
+            <a href="/" title="Главная">Бригантина</a>
+            <span style="color:white">(&beta;eta)</span>
+          </h1>
+          <div id='site-slogan'>
+            Книжное братство
+          </div>
+      </div>
+      <div class="menu">
+        <div id="primary" class="clear-block">
+          <ul class="links primary-links">
+            <li><a href="" title="">Сообщество</a></li>
+            <li><a href="" title="">Помощь библиотеке</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div id="container" class="withleft clear-block">
+      <div id="main-wrapper">
+        <div id="main" class="clear-block">
+          <div class="content">
+$:content
+          </div>
+        </div>
+      </div>
+
+<!-- левое меню -->
+<div id="sidebar-left" class="sidebar">
+  <!-- поиск -->
+  <div class="block blockinner">
+    <h2 class="title">Поиск книг</h2>
+    <form action="/booksearch" method="POST">
+      <input name="q" type="text"/>
+      <button name="submit" type="submit">&raquo;</button>
+    </form>
+  </div>
+<!-- пользователь -->
+<div class="block blockinner">
+$if context.username:
+  <h2 class="title">$context.username</h2>
+  <ul class="menu">
+  <li class="leaf first"><a href="/watchlist">Список наблюдения</a></li>
+  <li class="leaf"><a href="/user/$context.username">Личная страница</a></li>
+  <li class="leaf"><a href="/logout">Выйти</a></li>
+  </ul>
+$else:
+  <h2 class="title">Гость</h2>
+  <ul class="menu"><li class="leaf first"><a href="/login">Зайти</a></li></ul>
+</div>
+<!-- библиотека -->
+<div class="block blockinner">
+  <h2>Библиотека</h2>
+  <ul class="menu">
+  <li class="leaf"><a href="/genre" title="">Жанры</a></li>
+  <li class="leaf"><a href="/newbooks" title="">Новые книги</a></li>
+  <li class="leaf"><a href="/newfiles" title="">Новые файлы</a></li>
+  <li class="leaf"><a href="/recentchanges" title="">Последние изменения</a></li>
+  <li class="leaf"><a href="/statistics">Статистика</a></li>
+  </ul>
+</div>
+<!-- впечатления о книгах -->
+<div class="block blockinner">
+  <h2><a href="/reviews">Впечатления о книгах</a></h2>
+</div>
+<!-- добавить -->
+$if context.username:
+  <div class="block blockinner">
+  <h2>Добавить</h2>
+  <ul class="menu">
+  <li class="leaf"><a href="/upload">Залить файл</a></li>
+  <li class="leaf"><a href="/addbook">Добавить описание книги</a></li>
+  <li class="leaf"><a href="/addauthor">Добавить описание автора</a></li>
+  </ul>
+  </div>
+</div>
+      <div id="footer">
+        Powered by web.py
+      </div>
+    </div>
+  </body>
+</html>

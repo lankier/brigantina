@@ -1,0 +1,13 @@
+$def with (authorid, err=None)
+$var title: Добавить другое имя
+<h1>Добавить другое имя</h1>
+$if err:
+  <p class="error">$err</p>
+<form method="POST" action="/editauthor/$authorid/addalias">
+<b>Имя:</b> <input name="firstname"><br/>
+<b>Отчество:</b> <input name="middlename"><br/>
+<b>Фамилия:</b> <input name="lastname"><br/>
+<b>Псевдоним:</b> <input name="nickname"><br/>
+<button name="submit" type="submit">Отправить</button>
+</form>
+<p><a href="/editauthor/$authorid">Вернуться</a> на страницу редактирования.</p>

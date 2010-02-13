@@ -1,0 +1,14 @@
+$def with (title=None, err=None, back=None)
+$if title:
+  $var title: $title
+  $ t = title
+$else:
+  $var title: Нет доступа
+  $ t = 'Нет доступа'
+<h1>$t</h1>
+$if err:
+  <p class="error">$err</p>
+$else:
+  <p class="error">Сожалеем, но у вас нет прав на эти действия.</p>
+$if back:
+  <p><a href="$back">Вернуться</a></p>

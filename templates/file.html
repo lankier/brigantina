@@ -1,0 +1,60 @@
+$def with (file)
+$var title: Файл $file.title
+$:chunkrender.page_tab(file.id, 'file', '')
+
+$if context.message:
+  <div class="message">$context.message</div>
+
+<h1>$file.title</h1>
+<!-- Файл № $file.id -->
+
+<h3>Свойства файла</h3>
+
+<p>
+<b>Язык файла:</b> $file.lang<br/>
+<b>Год издания:</b> $file.year<br/>
+<b>Тип файла:</b> $file.filetype<br/>
+<b>Автор:</b> $file.fileauthor<br/>
+<b>Размер файла:</b> $(file.filesize/1024) KB<br/>
+<b>Размер текста:</b> $(file.textsize/1024) KB<br/>
+<b>fb2 id:</b> $file.fb2id<br/>
+<b>fb2 version:</b> $file.fb2version<br/>
+<b>md5:</b> $file.md5<br/>
+<b>Добавлен в библиотеку:</b> $file.added<br/>
+</p>
+
+<h3>Переводчики</h3>
+<ul>
+$for tr in file.translators:
+  <li><a href="/author/$tr.id">$authorname(tr)</a></li>
+</ul>
+
+<h3>Связанные с файлом книги</h3>
+<ul>
+$for b in file.books:
+  <li><a href="/book/$b.id">$b.title</a> \
+  $if b.authors:
+    &mdash; \
+    $ a = b.authors[0]
+    <a href="/author/$a.id">$authorname(a)</a>\
+  </li>
+</ul>
+
+$if file.sequences:
+  <h3>Издательские серии</h3>
+  <ul>
+  $for s in file.sequences:
+    <li>$s.name</li>
+  </ul>
+
+$if file.filetype == 'fb2':
+  <p><a href="/file/$file.id/desc">Посмотреть fb2 description</a></p>
+  <h3>Ошибки</h3>
+  $if file.errors:
+    <div>ошибок: $file.numerrors<br/> предупреждений: $file.numwarnings<br/>
+    (<a href="/file/$file.id/errors">посмотреть</a>)</div><br/>
+  $else:
+    <div>Ошибки отсутствуют</div>
+
+$:chunkrender.reviews(file.reviews, use_rating=False, h='Комментарии к файлу')
+

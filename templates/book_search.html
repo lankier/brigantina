@@ -1,0 +1,25 @@
+$def with (q, n, authors, aliases, books, alttitles, sequences)
+$var title: Поиск книг (найдено $n)
+<h1>Поиск книг</h1>
+<p>Ищем <b>«$q»</b></p>
+$if not n:
+  <p>Ничего не найдено</p>
+$else:
+  $if authors:
+    <h3>Найдено среди авторов</h3><ul>
+    $for a in authors:
+      <li><a href="/author/$a.id">$authorname(a)</a></li>
+    </ul>
+  $if books or alttitles:
+    <h3>Найдено среди книг</h3>
+    <ul>
+    $:chunkrender.books_list(books)
+    $:chunkrender.books_list(alttitles, alttitles=True)
+    </ul>
+  $if sequences:
+    <h3>Найдено среди сериалов</h3>
+    <ul>
+    $for s in sequences:
+      <li><a href="/sequence/$s.id">$s.name</a></li>
+    </ul>
+

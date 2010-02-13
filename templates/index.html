@@ -1,0 +1,6 @@
+$def with ()
+$var title: Добро пожаловать
+<h1>Добро пожаловать,
+$if context.username: $context.username
+$else: гость
+</h1>

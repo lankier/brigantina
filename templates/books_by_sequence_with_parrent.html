@@ -1,0 +1,58 @@
+$def with (books)
+$# предыдущий сериал
+$ prevsequence = None
+$# предыдущий родительский сериал
+$ prevpar = None
+$ firstbook = True
+$for b in books:
+    $if prevpar:
+        $if not b.sequenceparrent or (b.sequenceparrent and b.sequenceparrent.id != prevpar):
+            $# закрываем предыдущий родительский сериал
+            </ul></li></ul>
+    $if b.sequenceparrent and b.sequenceparrent.id != prevpar:
+        $# открываем родительский сериал
+        <ul><li><a href="/sequence/$b.sequenceparrent.id">$b.sequenceparrent.name</a>
+        $ firstbook = False
+    $if b.sequenceid != prevsequence:
+        $if prevsequence is not None:
+            $# закрываем предыдущий сериал
+            </ul></li></ul>
+        $if b.sequenceid:
+            $# открываем сериал
+            <ul><li><a href="/sequence/$b.sequenceid">$b.sequencename</a><ul>
+            $ firstbook = False
+        $else:
+            $# или просто список файлов
+            <ul>
+            $ firstbook = False
+    $ prevsequence = b.sequenceid
+    $ prevpar = b.sequenceparrent.id if b.sequenceparrent else None
+    $# выводим книгу
+    $if firstbook:
+      $ firstbook = False
+      <ul>
+    <li>
+    $if b.sequenceid:
+        $if b.sequencenumber:
+          $(b.sequencenumber). \
+    <a href="/book/$b.id">$b.title</a>
+    $if b.files:
+      <ul>
+      $for f in b.files:
+        $if f.title == b.title:
+          <li>скачать:
+        $else:
+          <li>скачать $f.title:
+        $if f.filetype == 'fb2':
+          <a href="/file/$f.id/download/fb2">fb2</a> |
+          <a href="/file/$f.id/download/txt">txt</a> |
+          <a href="/file/$f.id/download/html">html</a>
+        $else: <a href="/file/$f.id/download/$f.filetype">$f.filetype</a>
+      </ul>
+
+$# закрываем теги
+$if prevpar:
+    </ul>
+$if prevsequence:
+    </ul>
+</ul>

@@ -1,0 +1,114 @@
+.maininfo {
+    /*border-right: 1px solid #bfc4cf;*/
+    border-left: 1px solid #bfc4cf;
+    border-bottom: 1px solid #bfc4cf;
+    /*background: #f2f2f5;*/
+    margin-right: 4px;
+    margin-bottom: 8px;
+    padding: 0 4px 0 8px;
+}
+.message {
+    background: #dcffdf;
+    border: 1px solid black;
+    /*color: #35772b;*/
+    color: black;
+    margin-top: 16px;
+    margin-bottom: 16px;
+    padding: 10px;
+}
+.error {
+    font-weight: bold;
+    color: red;
+}
+#changes {
+    border-collapse: collapse;
+    border: 1px solid black;
+}
+#changes td {
+    border: 1px solid black;
+    padding: 4px;
+}
+#changes th {
+    border: 1px solid black;
+    padding: 4px;
+}
+.review {
+    border-bottom:1px solid #ddd;
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+.review p {
+    text-indent: 1em;
+    margin: 0;
+}
+.reviewtime {
+    color: #888;
+}
+.bookyear {
+    padding-left: 6px;
+    font-size: 10px;
+    /*color: #888;*/
+}
+#login table {
+    width: auto;
+}
+#login td {
+    border: 0 none;
+}
+#login th {
+    margin: 0;
+    padding: 0;
+    border: 0 none;
+}
+/* для аннотаций */
+.epigraph {
+  width:65%;
+  margin-left: 35%;
+}
+.paragraph {
+  text-align: justify;
+  text-indent: 1em;
+  margin-left: 0px;
+  margin-top: 5px;
+  margin-right: 0px;
+  margin-bottom: 0px;
+  /*line-height: 110%;*/
+}
+.poem {
+  margin: 0 1em 0.2em 4em;
+}
+.cite {
+  margin: 0 1em 0.2em 4em;
+}
+.annotation {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+.seqdesc {
+    margin-left: 0px;
+    padding-left: 0px;
+}
+.seqdesc h4 {
+    font-weight: bold;
+}
+.seqdesc div {
+    margin-left: 0px;
+    padding-left: 40px;
+}
+.seqdesc div div {
+    margin-left: 0px;
+    padding-left: 0px;
+}
+.bookdesc {
+    margin-left: 0px;
+    margin-bottom: 20px;
+}
+.bookdesc .annotation {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+.bookdesc .annotation p {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+

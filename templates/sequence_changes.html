@@ -1,0 +1,6 @@
+$def with (sequenceid, changes, page, numpages)
+$var title: Последние изменения
+$:chunkrender.page_tab(sequenceid, 'sequence', 'history')
+
+<h1>Последние изменения</h1>
+$:chunkrender.changes(changes, page, numpages, '/sequencehistory/'+sequenceid)

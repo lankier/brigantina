@@ -1,0 +1,9 @@
+$def with (bookid, back, title, what, label)
+$var title: $title
+<h1>$title</h1>
+<form method="POST">
+  <label for="$what">$label</label>
+  <input type="text" name="$what">
+  <button name="submit" type="submit">Отправить</button>
+</form>
+<p><a href="$back$bookid">Вернуться</a> к редактированию.</p>

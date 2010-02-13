@@ -1,0 +1,5 @@
+$def with (watch_list)
+$var title: Список наблюдения
+<h1>Список наблюдения</h1>
+$for item in watch_list:
+  $item.what <a href="$item.url">$item.title</a> (<a href="$item.delurl?back=/viewwatchlist">удалить</a>)<br/>

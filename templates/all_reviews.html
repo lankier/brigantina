@@ -1,0 +1,24 @@
+$def with (reviews, page, numpages)
+$var title: Отзывы
+<h1>Отзывы</h1>
+$ prev_date = None
+$for r in reviews:
+  $ date = strtime(r.mtime, 'day')
+  $if date != prev_date:
+    <h3>$date</h3>
+    $ prev_date = date
+  <div class="review">
+  <strong><a href="/user/$r.username">$r.username</a></strong> про
+  $:chunkrender.book_info(r.book)
+  <span class="reviewtime">$strtime(r.ctime, 'sec')
+  $if r.ctime != r.mtime:
+    <em>(изменено $strtime(r.mtime, 'sec'))</em>
+  $if r.username == context.username:
+    | <a href="/editreview/$r.id">Изменить</a>
+    | <a href="/deletereview/$r.id">Удалить</a>
+  </span>
+  <br />
+  $:r.html
+  </div>
+
+$:chunkrender.paging(page, numpages)
