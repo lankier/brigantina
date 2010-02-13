@@ -1,1 +1,20 @@
-                                      -*- mode: text; coding: utf-8; -*-
+<!--*- mode: markdown; coding: utf-8; -*-->
+Требования
+==========
+
+* [python](http://python.org/)
+* [web.py](http://webpy.org/)
+* [python-lxml](http://codespeak.net/lxml/)
+* [postgresql](http://www.postgresql.org/)
+* [psycopg2](http://www.initd.org/pub/software/psycopg/)
+* [python-markdown](http://freewisdom.org/projects/python-markdown)
+
+Запуск
+======
+
+    mkdir ocr
+    mkdir files
+    python start.py
+
+И зайти браузером на <http://localhost:8080/>
+

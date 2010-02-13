@@ -1,2 +1,2 @@
 include templates/*.html static/* xslt/* schema/* db.sql genres.dump
-include librusecimport.py reset.sh
+include librusecimport.py COPYING README MANIFEST.in setup.cfg
