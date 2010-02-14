@@ -9,12 +9,19 @@
 * [psycopg2](http://www.initd.org/pub/software/psycopg/)
 * [python-markdown](http://freewisdom.org/projects/python-markdown)
 
+Конфигурирование
+================
+
+См. brigantina/config.py
+
 Запуск
 ======
 
     mkdir ocr
     mkdir files
-    python start.py
+    createdb library          # создать базу данных (см. brigantina/config.py)
+    cat db.sql genres.dump | psql library # инициировать её
+    python runserver.py                   # запустить http-server
 
 И зайти браузером на <http://localhost:8080/>
 

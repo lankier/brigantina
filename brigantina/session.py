@@ -38,9 +38,14 @@ class DBStore(web.session.DBStore):
 ## связь с друпалом
 ## ----------------------------------------------------------------------
 
-_drupal_db = web.database(**drupal_db_args)
+try:
+    _drupal_db = web.database(**drupal_db_args)
+except:
+    _drupal_db = None
 
 def check_password(username, password):
+    if _drupal_db is None:
+        return True
     try:
         res = _drupal_db.select('users', locals(), where='name=$username')[0]
     except IndexError:
@@ -49,6 +54,8 @@ def check_password(username, password):
     return (digest == res['pass'])
 
 def get_userid(username):
+    if _drupal_db is None:
+        return ''
     try:
         res = _drupal_db.select('users', locals(), where='name=$username')[0]
     except IndexError:

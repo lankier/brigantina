@@ -18,13 +18,13 @@ urls = pages_urls + edit_urls
 web.config.session_parameters.update(session_parameters)
 web.config.debug = False
 
-app = web.application(urls, globals())
+webapp = web.application(urls, globals())
 
 def init_session():
     store = DBStore(libdb._db, 'sessions') # используем собственный store
     #store = web.session.DBStore(libdb._db, 'sessions')
     init = dict(username='', message='')
-    session = web.session.Session(app, store, initializer=init)
+    session = web.session.Session(webapp, store, initializer=init)
     web.config._session = session
     return session
 session = init_session()
@@ -60,15 +60,12 @@ __builtin__.render = render
 def notfound():
     '''страница 404'''
     return web.notfound(render.not_found())
-app.notfound = notfound
+webapp.notfound = notfound
 
 def internalerror():
     '''внутренняя ошибка'''
     return web.internalerror(render.internal_error())
-app.internalerror = internalerror
-
-def start():
-    app.run()
+webapp.internalerror = internalerror
 
 if __name__ == "__main__":
     #logfd = open(log_file, 'a')

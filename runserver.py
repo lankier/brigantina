@@ -5,9 +5,7 @@ import sys, os
 # в котором лежит скрипт запуска
 dir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(dir)
-sys.path.append(dir)                    # wsgi
 
 from brigantina import code
 # поехали!
-#code.start()                            # stand alone server
-application = code.webapp.wsgifunc()    # wsgi
+code.webapp.run()                       # stand alone server
