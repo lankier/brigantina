@@ -7,7 +7,11 @@ dir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(dir)
 sys.path.append(dir)                    # wsgi
 
-from brigantina import code
+from brigantina import code, config
+
+# logging
+#sys.stderr = open(config.log_file, 'a')
+
 # поехали!
 #code.start()                            # stand alone server
 application = code.webapp.wsgifunc()    # wsgi

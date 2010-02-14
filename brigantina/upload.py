@@ -13,7 +13,7 @@ import web
 import traceback
 
 from config import upload_dir
-from utils import mime_type
+from utils import mime_type, logger
 import addfile
 import libdb
 

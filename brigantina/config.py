@@ -7,7 +7,7 @@ drupal_db_args = dict(dbn='mysql', db='drupal', user='www', pw='a1s2d3')
 
 home_dir = ''
 templates_dir = 'templates'
-log_file = 'weblog'
+log_file = 'log/brigantina.log'
 upload_dir = 'ocr'
 books_dir = 'files'
 xslt_dir = 'xslt'

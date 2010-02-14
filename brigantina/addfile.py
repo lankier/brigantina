@@ -13,7 +13,7 @@ import validator
 import libdb
 import plugins
 from config import books_dir
-from utils import annotation2html, authorname, makedir
+from utils import annotation2html, authorname, makedir, logger
 
 namespaces = {'m': 'http://www.gribuser.ru/xml/fictionbook/2.0',
               'xlink':'http://www.w3.org/1999/xlink',

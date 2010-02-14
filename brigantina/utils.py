@@ -4,12 +4,14 @@
 import sys, os
 import time
 import subprocess
+import logging
+import logging.handlers
 from lxml import etree
 from xml.sax.saxutils import escape
 from markdown import markdown
 from unidecode import unidecode
 
-from config import xslt_dir, books_dir
+from config import xslt_dir, books_dir, log_file
 
 def get_dsn(db_args):
     dsn = ''
@@ -20,6 +22,19 @@ def get_dsn(db_args):
         if dsn: dsn += ' '
         dsn += k+'='+v
     return dsn
+
+def _create_logger():
+    fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    logger = logging.getLogger('Brigantina')
+    logging.basicConfig(format=fmt)
+    logger.setLevel(logging.DEBUG)
+    handler = logging.handlers.RotatingFileHandler(
+        log_file, maxBytes=1024*1024, backupCount=5)
+    logger.addHandler(handler)
+    formatter = logging.Formatter(fmt)
+    handler.setFormatter(formatter)
+    return logger
+logger = _create_logger()
 
 def authorname(a):
     '''создаёт полное имя автора:

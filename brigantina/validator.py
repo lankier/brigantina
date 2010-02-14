@@ -4,6 +4,7 @@
 import sys, os
 from lxml import etree
 from config import schema_dir, schema_file, annotation_schema_file
+from utils import logger
 
 class ValidationError(Exception):
     pass
@@ -97,22 +98,19 @@ def check_empty_tags(xml, errors):
                 errs += 1
     return errs
 
-schema = None
 def lxml_lint(data, errors, from_str=False):
-    global schema
     try:
         if from_str:
             xml = etree.XML(data)
         else:
-            xml = etree.parse(data)
+            xml = etree.parse(data)     # from file
     except:
         return None
-    if schema is None:
-        curdir = os.path.abspath(os.path.curdir)
-        xsd = get_xsd()
-        os.chdir(os.path.dirname(xsd))
-        schema = etree.XMLSchema(etree.XML(open(xsd).read()))
-        os.chdir(curdir)
+    curdir = os.path.abspath(os.path.curdir)
+    xsd = get_xsd()
+    os.chdir(os.path.dirname(xsd))
+    schema = etree.XMLSchema(etree.parse(xsd))
+    os.chdir(curdir)
     r = schema.validate(xml)
     if not r:
         #errors.append(u'Ошибки при проверке fb2')

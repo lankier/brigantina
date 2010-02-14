@@ -14,9 +14,45 @@
 
 См. brigantina/config.py
 
-Запуск
-======
+Насторойка apache+mod_wsgi
+--------------------------
 
+Конфигурация апача для запуска на порту 8000. Добавить в файл конфигурации
+(для debian/ubuntu в /etc/apache2/ports.conf):
+    NameVirtualHost *:8000
+    Listen 8000
+
+Файл конфигурации виртуального хоста /etc/apache2/sites-available/brigantina:
+(здесь /var/www/brigantina - каталог, в котором лежит приложение)
+    <VirtualHost *:8000>
+        DocumentRoot /var/www/brigantina/
+        WSGIScriptAlias / /var/www/brigantina/start.py/
+        Alias /static /var/www/brigantina/static/
+        Alias /files /var/www/brigantina/files/
+        AddType text/html .py
+        <Directory /var/www/brigantina/>
+            Order deny,allow
+            Allow from all
+        </Directory>
+    </VirtualHost>
+
+Файл конфигурации модуля wsgi /etc/apache2/mods-available/wsgi.conf:
+    <IfModule mod_wsgi.c>
+         # http://www.mail-archive.com/modwsgi@googlegroups.com/msg01055.html
+         WSGIApplicationGroup %{GLOBAL}
+    </IfModule>
+
+Разрешить mod_wsgi:
+    $ sudo a2enmod wsgi
+
+Добавить виртуальный хост:
+    $ sudo a2ensite brigantina
+
+Разрешить апачу запись в каталоги files и ocr.
+
+
+Запуск stand-alone сервера (devel-режим)
+========================================
     mkdir ocr
     mkdir files
     createdb library          # создать базу данных (см. brigantina/config.py)
