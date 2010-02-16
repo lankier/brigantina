@@ -395,5 +395,6 @@ def add_book(title, allauthors, allgenres=[], allsequences=[], **book):
 
 
 if __name__ == '__main__':
+    session = web.Storage()
     print add_fb2_file(sys.argv[1], [])
 

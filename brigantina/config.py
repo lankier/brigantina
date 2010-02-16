@@ -2,21 +2,25 @@
 # -*- mode: python; coding: utf-8; -*-
 # (c) Lankier mailto:lankier@gmail.com
 
+# параметры базы данных
 db_args = dict(dbn='postgres', db='library', user='con', pw='')
+# связь с друпалом (опционально, если движок не сможет подключиться к базе,
+# он будет пускать с любым login+password)
 drupal_db_args = dict(dbn='mysql', db='drupal', user='www', pw='a1s2d3')
 
-home_dir = ''
+home_dir = ''                           # пока не используется
 templates_dir = 'templates'
 log_file = 'log/brigantina.log'
-upload_dir = 'ocr'
-books_dir = 'files'
-xslt_dir = 'xslt'
+upload_dir = 'ocr'              # куда будут складываться файлы при заливке
+                                # (должен быть доступен для записи веб-серверу
+books_dir = 'files'             # где хранятся файлы книг
+xslt_dir = 'xslt'               # каталог с файлами для xsl-трансформации
 
-filetypes = ('fb2', 'html', 'txt')
+filetypes = ('fb2', 'html', 'txt') # форматы, в которые можно преобразовать fb2
 
-schema_dir = 'schema'
-schema_file = 'FictionBook2.21.xsd'
-annotation_schema_file = 'annotation.xsd'
+schema_dir = 'schema'                     # каталог с файлами схемы fb2
+schema_file = 'FictionBook2.21.xsd'       # имя основного файла схемы
+annotation_schema_file = 'annotation.xsd' # для проверки аннотаций
 
 session_parameters = {
     'cookie_name': 'session_id',
