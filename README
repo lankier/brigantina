@@ -62,3 +62,8 @@
 
 И зайти браузером на <http://localhost:8080/>
 
+FreeBSD
+=======
+
+Для нормальной работы в FreeBSD Python должен быть собран с опцией
+    [X] PTH Use GNU Pth for threading/multiprocessing
