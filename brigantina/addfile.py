@@ -12,7 +12,7 @@ import web
 import validator
 import libdb
 import plugins
-from config import books_dir
+from config import books_dir, generate_when_adding
 from utils import annotation2html, authorname, makedir, logger
 
 namespaces = {'m': 'http://www.gribuser.ru/xml/fictionbook/2.0',
@@ -306,12 +306,13 @@ def add_fb2_file(fn, errors):
     shutil.move(fn, to)
     # иллюстрации/обложки
     save_binaries(xml, dir, fileid)
-    # записываем txt
-    to = os.path.join(dir, fileid+'.txt')
-    open(to, 'w').write(txt)
-    # создаём и записываем html
-    to = os.path.join(dir, fileid+'.html')
-    plugins.fb2_to_html(to, xml=xml)
+    if generate_when_adding:
+        # записываем txt
+        to = os.path.join(dir, fileid+'.txt')
+        open(to, 'w').write(txt)
+        # создаём и записываем html
+        to = os.path.join(dir, fileid+'.html')
+        plugins.fb2_to_html(to, xml=xml)
     # аннотация
     save_annotation(xml, bookid, fileid)
     # fb2 description

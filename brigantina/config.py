@@ -33,3 +33,6 @@ session_parameters = {
 }
 # список привилегированных пользователей
 admins = ['admin',]
+
+# генерировать файлы из fb2 при добавлении
+generate_when_adding = True
