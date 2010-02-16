@@ -12,7 +12,8 @@
 Конфигурирование
 ================
 
-См. brigantina/config.py
+Файл конфигурации см. brigantina/config.py. Там указываются параметры
+подключения к базе данных, служебные каталоги и т.д.
 
 Насторойка apache+mod_wsgi
 --------------------------
@@ -55,7 +56,7 @@
 ========================================
     mkdir ocr
     mkdir files
-    createdb library          # создать базу данных (см. brigantina/config.py)
+    createdb -E UTF8 library  # создать базу данных (см. brigantina/config.py)
     cat db.sql genres.dump | psql library # инициировать её
     python runserver.py                   # запустить http-server
 
