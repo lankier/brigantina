@@ -1258,19 +1258,18 @@ def file_get_images(fileid, what='images'):
 
 def book_search(query):
     n = 0                               # кол-во найденного
-    name = ' '.join(query.split())      # убираем лишние пробелы
-    #name = name.lower()                 # NB: type(query) is unicode
+    query = ' '.join(query.split())     # убираем лишние пробелы
+    tsquery = "@@plainto_tsquery('russian', $query)"
     # 1. авторы
-    where="(firstname||' '||middlename||' '||lastname)@@plainto_tsquery('russian', $name)"
+    where="(firstname||' '||middlename||' '||lastname||' '||nickname)"+tsquery
     authors = list(_db.select('authors', locals(), where=where,
                               order='lastname, firstname, middlename'))
     n = len(authors)
     # 2. псевдонимы авторов
     aliases = list(_db.select('authorsaliases', locals(), where=where,
-                              order='lastname, firstname, middlename'))
+                              order='nickname, lastname, firstname, middlename'))
     # 3. название книги
-    books = list(_db.select('books', locals(),
-                            where="title@@plainto_tsquery('russian', $name)",
+    books = list(_db.select('books', locals(), where='title'+tsquery,
                             order='title'))
     for b in books:
         add_authors_to_book(b, limit=1)
@@ -1279,13 +1278,12 @@ def book_search(query):
     alttitles = list(_db.query(
         'select books.*, alttitles.title as alttitle '
         'from books, alttitles where books.id = alttitles.bookid '
-        "and alttitles.title@@plainto_tsquery('russian', $name)", vars=locals()))
+        'and alttitles.title'+tsquery, vars=locals()))
     for b in alttitles:
         add_authors_to_book(b, limit=1)
     n += len(alttitles)
     # 5. авторские сериалы
-    sequences = list(_db.select('sequences', locals(),
-                                where="name@@plainto_tsquery('russian', $name)",
+    sequences = list(_db.select('sequences', locals(), where='name'+tsquery,
                                 order='name'))
     n += len(sequences)
     # издательские серии
