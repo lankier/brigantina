@@ -1261,16 +1261,7 @@ def book_search(query):
     name = ' '.join(query.split())      # убираем лишние пробелы
     #name = name.lower()                 # NB: type(query) is unicode
     # 1. авторы
-    # (фамилия) или
-    # (имя фамилия) или
-    # (фамилия имя) или
-    # (имя отчество фамилия) или
-    # (nickname)
-    where = ("lastname ilike $name or "
-             "(lastname||' '||firstname) ilike $name or "
-             "(firstname||' '||lastname) ilike $name or "
-             "(firstname||' '||middlename||' '||lastname) ilike $name or "
-             "nickname ilike $name")
+    where="(firstname||' '||middlename||' '||lastname)@@plainto_tsquery('russian', $name)"
     authors = list(_db.select('authors', locals(), where=where,
                               order='lastname, firstname, middlename'))
     n = len(authors)
@@ -1278,9 +1269,9 @@ def book_search(query):
     aliases = list(_db.select('authorsaliases', locals(), where=where,
                               order='lastname, firstname, middlename'))
     # 3. название книги
-    title = '%'+name+'%'
-    where = 'title ilike $title'
-    books = list(_db.select('books', locals(), where=where, order='title'))
+    books = list(_db.select('books', locals(),
+                            where="title@@plainto_tsquery('russian', $name)",
+                            order='title'))
     for b in books:
         add_authors_to_book(b, limit=1)
     n += len(books)
@@ -1288,14 +1279,14 @@ def book_search(query):
     alttitles = list(_db.query(
         'select books.*, alttitles.title as alttitle '
         'from books, alttitles where books.id = alttitles.bookid '
-        'and lower(alttitles.title) like $title', vars=locals()))
+        "and alttitles.title@@plainto_tsquery('russian', $name)", vars=locals()))
     for b in alttitles:
         add_authors_to_book(b, limit=1)
     n += len(alttitles)
     # 5. авторские сериалы
-    where = 'lower(name) like $title'
     sequences = list(_db.select('sequences', locals(),
-                                where=where, order='name'))
+                                where="name@@plainto_tsquery('russian', $name)",
+                                order='name'))
     n += len(sequences)
     # издательские серии
     # файлы (заголовки)
