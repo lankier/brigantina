@@ -185,9 +185,7 @@ class EditAuthorPage:
         if not author:
             raise web.notfound()
         author.biography = text2html(author.biography)
-        html = render.edit_author(author)
-        session.message = ''            # сбрасываем сообщение
-        return html
+        return render.edit_author(author)
 
 class EditAuthorSetNamePage:
     def GET(self, authorid):
@@ -260,9 +258,7 @@ class EditBookPage:
         book = libdb.get_book(bookid, add_hidden_files=True)
         if not book:
             raise web.notfound()
-        html = render.edit_book(book)
-        session.message = ''            # сбрасываем сообщение
-        return html
+        return render.edit_book(book)
 
 class EditBookBlockPage:
     def POST(self, bookid):
@@ -518,9 +514,7 @@ class EditSequencePage:
                 return render.edit_sequence_error(sequenceid, u'Ошибка', err)
             session.message = u'Родительский сериал удалён'
             raise web.seeother('/editsequence/'+sequenceid)
-        html = render.edit_sequence(sequence)
-        session.message = ''
-        return html
+        return render.edit_sequence(sequence)
     POST = GET
 
 class EditSequenceSetParrentPage:
@@ -573,9 +567,7 @@ class EditFilePage:
         file = libdb.get_file(fileid)
         if not file:
             raise web.notfound()
-        html = render.edit_file(file)
-        session.message = ''            # сбрасываем сообщение
-        return html
+        return render.edit_file(file)
     POST = GET
 
 class EditFileSetTitlePage:

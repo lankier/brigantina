@@ -100,10 +100,7 @@ class BookPage:
             book.avg = round(float(book.sum) / book.num, 2)
         else:
             book.avg = 0
-        html = render.book(book)
-        if session.message:
-            session.message = ''
-        return html
+        return render.book(book)
     def POST(self, bookid):
         i = web.input()
         if 'rating' in i:
@@ -127,9 +124,7 @@ class BookPage:
             html = text2html(review)
             libdb.add_review(username=session.username, bookid=bookid,
                              body=review, html=html)
-        html = self.GET(bookid)
-        session.message = ''
-        return html
+        return self.GET(bookid)
 
 class EditReviewPage:
     def GET(self, reviewid):
@@ -191,9 +186,7 @@ class AuthorPage:
             raise web.notfound()
         author.biography = text2html(author.biography)
         author.reviews = libdb.author_get_user_opinion(session.username, authorid)
-        html = render.author(author)
-        session.message = ''
-        return html
+        return render.author(author)
     def POST(self, authorid):
         i = web.input()
         if 'review' in i:
@@ -210,9 +203,7 @@ class SequencePage:
         sequence = libdb.get_sequence(sequenceid)
         if not sequence:
             raise web.notfound()
-        html = render.sequence(sequence)
-        session.message = ''
-        return html
+        return render.sequence(sequence)
 
 class GenrePage:
     def GET(self, genreid):
@@ -221,9 +212,7 @@ class GenrePage:
         genre, numpages, count = libdb.get_genre(genreid, page-1)
         if not genre:
             raise web.notfound()
-        html = render.genre(genre, page, numpages+1, count)
-        session.message = ''
-        return html
+        return render.genre(genre, page, numpages+1, count)
 
 class AllGenresPage:
     def GET(self):
@@ -236,9 +225,7 @@ class FilePage:
         if not file:
             raise web.notfound()
         file.reviews = libdb.file_get_user_opinion(session.username, fileid)
-        html = render.file(file)
-        session.message = ''
-        return html
+        return render.file(file)
     def POST(self, fileid):
         i = web.input()
         if 'review' in i:
@@ -255,18 +242,14 @@ class FileDescPage:
         file = libdb.get_file(fileid)
         if not file:
             raise web.notfound()
-        html = render.file_description(file)
-        session.message = ''
-        return html
+        return render.file_description(file)
 
 class FileErrorsPage:
     def GET(self, fileid):
         file = libdb.get_file(fileid)
         if not file:
             raise web.notfound()
-        html = render.file_errors(file)
-        session.message = ''
-        return html
+        return render.file_errors(file)
 
 ## ----------------------------------------------------------------------
 ## история изменений
