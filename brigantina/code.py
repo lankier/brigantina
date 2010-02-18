@@ -36,10 +36,16 @@ def is_watched(item, itemid):
         pass
     return False
 
+def get_message():
+    msg = session.message
+    session.message = ''
+    return msg
+
 _globals = {'context': session,
             'access': access,
             'authorname': authorname,
             'is_watched': is_watched,
+            'get_message': get_message,
             'strtime': strtime,
             'strsize': strsize,
             'fb2_formats': fb2_formats,

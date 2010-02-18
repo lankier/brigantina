@@ -39,6 +39,9 @@ $def with (content)
       <div id="main-wrapper">
         <div id="main" class="clear-block">
           <div class="content">
+$ msg = get_message()
+$if msg:
+  <div class="message">$msg</div>
 $:content
           </div>
         </div>

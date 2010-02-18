@@ -1,9 +1,6 @@
 $def with (genre, page, numpages, count)
 $var title: Жанр $genre.description
 
-$if context.message:
-  <div class="message">$context.message</div>
-
 <h1>Книги в жанре $genre.description</h1>
 
 <p>Всего $count книг</p>

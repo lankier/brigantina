@@ -6,9 +6,6 @@ $:chunkrender.page_tab(file.id, 'file', 'edit')
 
 Файл № $file.id
 
-$if context.message:
-  <div class="message">$context.message</div>
-
 <form method="POST" action="/editfile/$file.id/settitle">
 <b>Название:</b> <input name="title" value="$file.title">
 <button name="submit" type="submit">Сохранить название</button>

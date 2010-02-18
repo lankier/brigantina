@@ -4,9 +4,6 @@ $:chunkrender.page_tab(author.id, 'author', 'edit')
 
 <h1>$authorname(author)</h1>
 
-$if context.message:
-  <div class="message">$context.message</div>
-
 <form method="POST" action="/editauthor/$author.id/setname">
 <b>Имя:</b> <input name="firstname" value="$author.firstname">
 <button name="submit" type="submit">Сохранить имя</button>

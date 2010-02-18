@@ -4,9 +4,6 @@ $:chunkrender.page_tab(sequence.id, 'sequence', 'edit')
 
 <h1>$sequence.name</h1>
 
-$if context.message:
-  <div class="message">$context.message</div>
-
 <form method="POST" action="/editsequence/$sequence.id/setname">
 <b>Название:</b> <input name="name" value="$sequence.name">
 <button name="submit" type="submit">Сохранить название</button>

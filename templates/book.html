@@ -1,9 +1,7 @@
 $def with (book)
 $var title: Книга $book.title
 $:chunkrender.page_tab(book.id, 'book', '')
-<div class="maininfo"
-$if context.message:
-  <div class="message">$context.message</div>
+<div class="maininfo">
 
 $if book.sequences:
   <div style="float:right">

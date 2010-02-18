@@ -2,9 +2,6 @@ $def with (author)
 $var title: Автор $authorname(author)
 $:chunkrender.page_tab(author.id, 'author', '')
 
-$if context.message:
-  <div class="message">$context.message</div>
-
 <h1>$authorname(author)</h1>
 
 $if author.biography:

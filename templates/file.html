@@ -2,9 +2,6 @@ $def with (file)
 $var title: Файл $file.title
 $:chunkrender.page_tab(file.id, 'file', '')
 
-$if context.message:
-  <div class="message">$context.message</div>
-
 <h1>$file.title</h1>
 <!-- Файл № $file.id -->
 

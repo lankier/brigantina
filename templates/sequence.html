@@ -2,9 +2,6 @@ $def with (sequence)
 $var title: Сериал $sequence.name
 $:chunkrender.page_tab(sequence.id, 'sequence', '')
 
-$if context.message:
-  <div class="message">$context.message</div>
-
 <h1>$sequence.name</h1>
 
 <form method="POST" action="/download">

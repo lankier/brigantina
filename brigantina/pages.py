@@ -82,8 +82,10 @@ class Cover:
     '''обложки'''
     def GET(self, fileid):
         cover = libdb.get_cover(fileid)
+        if not cover:
+            raise web.notfound()
         path = os.path.join('/', books_dir, fileid, cover)
-        raise web.seeother(path)
+        raise web.redirect(path)
 
 class BookPage:
     def GET(self, bookid):
