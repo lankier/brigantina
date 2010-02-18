@@ -13,6 +13,7 @@ create table books (
   modified timestamp,
   permission int default 0,     -- 0 - полный доступ
   deleted boolean default false,
+  needupdate boolean default false,
   primary key (id)
 );
 -- доп. инф-ция о книге (см. также filesdesc)
@@ -59,6 +60,7 @@ create table files (
   librusecid int,
   origext text,        -- оригинальное расширение файла (с точкой, для не fb2)
   filename text,       -- имя файла транслитом (для fb2 без расширения)
+  needupdate boolean default false,
   primary key (id),
   unique (md5)
 );

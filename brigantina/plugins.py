@@ -133,17 +133,27 @@ def fb2_get(fileid, filetype):
     if filetype not in fb2_formats:
         return None
     dir = os.path.join(books_dir, fileid)
-    file = libdb.get_file_info(fileid)
+    file = libdb.get_file(fileid)
     if not file:
         return None
     if file.filetype != 'fb2':
         return None
     libdb.update_download_stat(session.username, fileid, filetype)
+    needupdate = False
+    if file.needupdate:
+        needupdate = True
+    else:
+        for b in file.books:
+            if b.needupdate:
+                needupdate = True
+                break
+    if needupdate:
+        path = os.path.join(dir, fileid+'.fb2')
+        ###update_fb2(path, file)
     fn = file.filename              # имя файла транслитом без расширения
     if not fn:
         # нет сохранённого имени файла - генерируем
-        libdb.add_books_to_file(file)
-        book = libdb.get_book(file.books[0].id)
+        book = libdb.get_book_info(file.books[0].id)
         fn = book_filename(file, book)
         # сохраняем
         libdb.file_update_filename(fileid, fn)
@@ -179,7 +189,7 @@ def other_get(fileid):
     if not fn:
         # нет сохранённого имени файла - генерируем
         libdb.add_books_to_file(file)
-        book = libdb.get_book(file.books[0].id)
+        book = libdb.get_book_info(file.books[0].id)
         fn = book_filename(file, book)
         # сохраняем
         libdb.file_update_filename(fileid, fn)

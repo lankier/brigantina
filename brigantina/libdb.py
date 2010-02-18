@@ -17,7 +17,7 @@ _db = web.database(**db_args)
 class DBError(Exception):
     pass
 
-def db_log(action, oldvalue=None, strvalue=None, **kwargs):
+def db_log(action, oldvalue=None, strvalue=None, needupdate=False, **kwargs):
     #print web.config._session.username, action, kwargs
     try:
         username = web.config._session.username
@@ -68,6 +68,44 @@ def db_log(action, oldvalue=None, strvalue=None, **kwargs):
         else:
             # если сохраняется строка
             _db.insert('oldvalues', False, actionid=id, body=oldvalue)
+    # помечаем, если требуется синхронизация
+    if not needupdate:
+        return
+    bookid = kwargs.get('bookid')
+    fileid = kwargs.get('fileid')
+    authorid = kwargs.get('authorid')
+    sequenceid =  kwargs.get('sequenceid')
+    if bookid:
+        _db.update('books', vars=locals(), needupdate=True,
+                   where='id = $bookid')
+    if fileid:
+        _db.update('files', vars=locals(), needupdate=True,
+                   where='id = $fileid')
+    # если автор - помечаем все его книги
+    if authorid:
+        for r in _db.select('booksauthors', locals(),
+                            where='authorid = $authorid'):
+            _db.update('books', vars=locals(), needupdate=True,
+                       where='id = $r.bookid')
+        for r in _db.select('bookstranslators', locals(),
+                            where='authorid = $authorid'):
+            _db.update('files', vars=locals(), needupdate=True,
+                       where='id = $r.fileid')
+    # все книги сериала
+    if sequenceid:
+        for r in _db.select('bookssequences', locals(),
+                            where='sequenceid = $sequenceid'):
+            _db.update('books', vars=locals(), needupdate=True,
+                       where='id = $r.bookid')
+
+def reset_need_update(bookid=None, fileid=None):
+    '''сбросить флаг needupdate'''
+    if bookid:
+        _db.update('books', vars=locals(), needupdate=False,
+                   where='id = $bookid')
+    else:
+        _db.update('files', vars=locals(), needupdate=False,
+                   where='id = $fileid')
 
 def undo(actionid):
     undo_actions = {
@@ -285,7 +323,8 @@ def add_gen(bookid, genreid):
             return False
         # нашли - заменяем
     _db.insert('booksgenres', False, genreid=genreid, bookid=bookid)
-    db_log(u'в книгу добавлен жанр', genreid=genreid, bookid=bookid)
+    db_log(u'в книгу добавлен жанр', genreid=genreid, bookid=bookid,
+           needupdate=True)
     return True
 
 def add_sequence(itemid, sequencename, sequencenumber, publish=False):
@@ -338,11 +377,12 @@ def add_sequence(itemid, sequencename, sequencenumber, publish=False):
         _db.insert(relattable, False, fileid=itemid,
                    sequenceid=sequenceid, sequencenumber=sequencenumber)
         db_log(u'в файл добавлена издательская серия', publsequenceid=sequenceid,
-               fileid=itemid)
+               fileid=itemid, needupdate=True)
     else:
         _db.insert(relattable, False, bookid=itemid,
                    sequenceid=sequenceid, sequencenumber=sequencenumber)
-        db_log(u'в книгу добавлен сериал', sequenceid=sequenceid, bookid=itemid)
+        db_log(u'в книгу добавлен сериал', sequenceid=sequenceid, bookid=itemid,
+               needupdate=True)
     return (sequenceid, newseq)
 
 def add_images(fileid, images, covers):
@@ -374,10 +414,11 @@ def _add_ann(table, column, id, ann, html, force=False):
                        vars=locals())
     if old:
         s = u'книги' if column == 'bookid' else u'файла'
-        db_log(u'изменена аннотация '+s, oldvalue=old, **{column: id})
+        db_log(u'изменена аннотация '+s, oldvalue=old, needupdate=True,
+               **{column: id})
     else:
         s = u'книге' if column == 'bookid' else u'файлу'
-        db_log(u'добавлена аннотация к '+s, **{column: id})
+        db_log(u'добавлена аннотация к '+s, needupdate=True, **{column: id})
 
 def add_book_desc(bookid, fileid, ann, html):
     '''добавление аннотации'''
@@ -699,6 +740,11 @@ def get_file_info(fileid):
         raise DBError(u'Такого автора не существует')
     return file
 
+def get_need_update(file):
+    if file.needupdate:
+        return True
+    
+
 def get_cover(fileid):
     try:
         res = _db.select('filesdesc', locals(), where='fileid = $fileid',
@@ -723,7 +769,8 @@ def edit_book_set_title(bookid, title):
     except IndexError:
         return
     _db.update('books', where='id = $bookid', title=title, vars=locals())
-    db_log(u'изменено название книги', oldvalue=old, bookid=bookid)
+    db_log(u'изменено название книги', oldvalue=old, bookid=bookid,
+           needupdate=True)
 
 def edit_book_set_year(bookid, year):
     try:
@@ -732,9 +779,10 @@ def edit_book_set_year(bookid, year):
         return
     _db.update('books', where='id=$bookid', year=year, vars=locals())
     if old:
-        db_log(u'изменён год написания книги', oldvalue=old, bookid=bookid)
+        db_log(u'изменён год написания книги', oldvalue=old, bookid=bookid,
+               needupdate=True)
     else:
-        db_log(u'установлен год написания книги', bookid=bookid)
+        db_log(u'установлен год написания книги', bookid=bookid, needupdate=True)
 
 def edit_book_set_lang(bookid, lang):
     try:
@@ -743,9 +791,10 @@ def edit_book_set_lang(bookid, lang):
         return
     _db.update('books', where='id = $bookid', lang=lang, vars=locals())
     if old:
-        db_log(u'изменён язык книги', oldvalue=old, bookid=bookid)
+        db_log(u'изменён язык книги', oldvalue=old, bookid=bookid,
+               needupdate=True)
     else:
-        db_log(u'установлен язык книги', bookid=bookid)
+        db_log(u'установлен язык книги', bookid=bookid, needupdate=True)
 
 def edit_book_add_alttitle(bookid, title):
     try:
@@ -756,7 +805,7 @@ def edit_book_add_alttitle(bookid, title):
     else:
         raise DBError(u'Такое название у этой книги уже есть.')
     _db.insert('alttitles', False, bookid=bookid, title=title)
-    db_log(u'в книгу добавлено альтернативное название', bookid=bookid)
+    db_log(u'в книгу добавлено альтернативное название', bookid=bookid, needupdate=True)
 
 def edit_book_del_alttitle(bookid, titleid):
     try:
@@ -766,7 +815,7 @@ def edit_book_del_alttitle(bookid, titleid):
         raise DBError(u'Такого названия у этой книги нет.')
     _db.delete('alttitles', vars=locals(),
                where='id = $titleid and bookid = $bookid')
-    db_log(u'из книги удалено альтернативное название', oldvalue=old, bookid=bookid)
+    db_log(u'из книги удалено альтернативное название', oldvalue=old, bookid=bookid, needupdate=True)
 
 def edit_book_add_genre(bookid, genreid):
     res = list(_db.select('genres', locals(), where='id = $genreid'))
@@ -780,7 +829,8 @@ def edit_book_add_genre(bookid, genreid):
     else:
         raise DBError(u'Такой жанр у этой книги уже есть')
     _db.insert('booksgenres', False, genreid=genreid, bookid=bookid)
-    db_log(u'в книгу добавлен жанр', genreid=genreid, bookid=bookid)
+    db_log(u'в книгу добавлен жанр', genreid=genreid, bookid=bookid,
+           needupdate=True)
 
 def edit_book_del_genre(bookid, genreid):
     try:
@@ -796,7 +846,7 @@ def edit_book_del_genre(bookid, genreid):
     _db.delete('booksgenres', vars=locals(),
                where='genreid = $genreid and bookid = $bookid')
     db_log(u'из книги удалён жанр', bookid=bookid, genreid=genreid,
-           oldvalue=oldvalue)
+           oldvalue=oldvalue, needupdate=True)
 
 def edit_book_search_author(bookid, author):
     '''поиск подходящего автора для добавления'''
@@ -830,7 +880,8 @@ def edit_book_add_author(bookid, authorid):
     else:
         raise DBError(u'Такой автор у этой книги уже есть.')
     _db.insert('booksauthors', False, bookid=bookid, authorid=authorid)
-    db_log(u'в книгу добавлен автор', bookid=bookid, authorid=authorid)
+    db_log(u'в книгу добавлен автор', bookid=bookid, authorid=authorid,
+           needupdate=True)
     return True
 
 def edit_book_del_author(bookid, authorid):
@@ -850,7 +901,7 @@ def edit_book_del_author(bookid, authorid):
     _db.delete('booksauthors', vars=locals(),
                where='authorid = $authorid and bookid = $bookid')
     db_log(u'из книги удалён автор', bookid=bookid, authorid=authorid,
-           oldvalue=authorid)
+           oldvalue=authorid, needupdate=True)
 
 def edit_book_search_file(bookid, file):
     '''поиск подходящего файла для добавления'''
@@ -1009,7 +1060,7 @@ def edit_book_del_sequence(bookid, sequenceid):
     _db.delete('bookssequences', vars=locals(),
                where='sequenceid = $sequenceid and bookid = $bookid')
     db_log(u'из книги удалён сериал', bookid=bookid, sequenceid=sequenceid,
-           oldvalue=oldvalue)
+           oldvalue=oldvalue, needupdate=True)
 ##     # удаляем из sequences если сериал больше ни одной книгой не используется
 ##     try:
 ##         _db.query('select * from bookssequences, sequences '
@@ -1035,13 +1086,17 @@ def edit_author_set_name(authorid, **kwargs):
     oldvalue = res[n]
     _db.update('authors', where='id=$authorid', vars=locals(), **kwargs)
     if n == 'firstname':
-        db_log(u'у автора изменено имя', authorid=authorid, oldvalue=oldvalue)
+        db_log(u'у автора изменено имя', authorid=authorid,
+               oldvalue=oldvalue, needupdate=True)
     elif n == 'middlename':
-        db_log(u'у автора изменено отчество', authorid=authorid, oldvalue=oldvalue)
+        db_log(u'у автора изменено отчество', authorid=authorid,
+               oldvalue=oldvalue, needupdate=True)
     elif n == 'lastname':
-        db_log(u'у автора изменена фамилия', authorid=authorid, oldvalue=oldvalue)
+        db_log(u'у автора изменена фамилия', authorid=authorid,
+               oldvalue=oldvalue, needupdate=True)
     elif n == 'nickname':
-        db_log(u'у автора изменён псевдоним', authorid=authorid, oldvalue=oldvalue)
+        db_log(u'у автора изменён псевдоним', authorid=authorid,
+               oldvalue=oldvalue, needupdate=True)
 
 def edit_author_set_biography(authorid, txt):
     try:
@@ -1094,7 +1149,8 @@ def edit_sequence_set_name(sequenceid, name):
     except IndexError:
         raise DBError(u'Неправильный сериал')
     _db.update('sequences', where='id = $sequenceid', name=name, vars=locals())
-    db_log(u'изменено название сериала', oldvalue=old, sequenceid=sequenceid)
+    db_log(u'изменено название сериала', oldvalue=old, sequenceid=sequenceid,
+           needupdate=True)
     return True
 
 def edit_sequence_set_parrent(sequenceid, parsequenceid, sequencenumber):
@@ -1144,7 +1200,7 @@ def edit_sequence_set_number(sequenceid, bookid, sequencenumber):
                where='bookid = $bookid and sequenceid = $sequenceid',
                sequencenumber=sequencenumber, vars=locals())
     db_log(u'у книги изменён порядковый номер в сериале', oldvalue=str(old),
-           bookid=bookid, sequenceid=sequenceid)
+           bookid=bookid, sequenceid=sequenceid, needupdate=True)
     return True
 
 ## ----------------------------------------------------------------------
@@ -1155,7 +1211,8 @@ def edit_file_set_title(fileid, title):
     except IndexError:
         return
     _db.update('files', where='id = $fileid', title=title, vars=locals())
-    db_log(u'изменён заголовок файла', oldvalue=old, fileid=fileid)
+    db_log(u'изменён заголовок файла', oldvalue=old, fileid=fileid,
+           needupdate=True)
 
 def edit_file_set_year(fileid, year):
     try:
@@ -1164,9 +1221,10 @@ def edit_file_set_year(fileid, year):
         return
     _db.update('files', where='id = $fileid', year=year, vars=locals())
     if old:
-        db_log(u'изменён год издания', oldvalue=old, fileid=fileid)
+        db_log(u'изменён год издания', oldvalue=old, fileid=fileid,
+               needupdate=True)
     else:
-        db_log(u'установлен год издания', fileid=fileid)
+        db_log(u'установлен год издания', fileid=fileid, needupdate=True)
 
 def edit_file_set_lang(fileid, lang):
     try:
@@ -1175,9 +1233,10 @@ def edit_file_set_lang(fileid, lang):
         return
     _db.update('files', where='id = $fileid', lang=lang, vars=locals())
     if old:
-        db_log(u'изменён язык издания', oldvalue=old, fileid=fileid)
+        db_log(u'изменён язык издания', oldvalue=old, fileid=fileid,
+               needupdate=True)
     else:
-        db_log(u'установлен язык издания', fileid=fileid)
+        db_log(u'установлен язык издания', fileid=fileid, needupdate=True)
 
 def edit_file_add_translator(fileid, authorid):
     '''добавляем переводчика в файл'''
@@ -1197,7 +1256,8 @@ def edit_file_add_translator(fileid, authorid):
     else:
         raise DBError(u'Такой переводчик у этого файла уже есть.')
     _db.insert('bookstranslators', False, fileid=fileid, authorid=authorid)
-    db_log(u'в файл добавлен переводчик', fileid=fileid, authorid=authorid)
+    db_log(u'в файл добавлен переводчик', fileid=fileid, authorid=authorid,
+           needupdate=True)
     return True
 
 def edit_file_del_translator(fileid, authorid):
@@ -1213,7 +1273,7 @@ def edit_file_del_translator(fileid, authorid):
     _db.delete('bookstranslators', vars=locals(),
                where='authorid = $authorid and fileid = $fileid')
     db_log(u'в файле удалён переводчик', fileid=fileid, authorid=authorid,
-           oldvalue=authorid)
+           oldvalue=authorid, needupdate=True)
 
 def edit_file_add_sequence(fileid, sequenceid, sequencenumber):
     '''добавляет издательскую серию в файл'''
@@ -1231,7 +1291,7 @@ def edit_file_del_sequence(fileid, sequenceid):
     _db.delete('filessequences', vars=locals(),
                where='sequenceid = $sequenceid and fileid = $fileid')
     db_log(u'из файла удалена издательская серия', fileid=fileid,
-           publsequenceid=sequenceid, oldvalue=oldvalue)
+           publsequenceid=sequenceid, oldvalue=oldvalue, needupdate=True)
 ##     # удаляем из publsequences если сериал больше ни одной книгой не используется
 ##     res = _db.query('select * from filessequences, publsequences '
 ##                     'where filessequences.sequenceid = publsequences.id '
@@ -1258,7 +1318,6 @@ def file_get_images(fileid, what='images'):
 
 def book_search(query):
     n = 0                               # кол-во найденного
-    query = ' '.join(query.split())     # убираем лишние пробелы
     tsquery = "@@plainto_tsquery('russian', $query)"
     # 1. авторы
     where="(firstname||' '||middlename||' '||lastname||' '||nickname)"+tsquery
@@ -1267,7 +1326,7 @@ def book_search(query):
     n = len(authors)
     # 2. псевдонимы авторов
     aliases = list(_db.select('authorsaliases', locals(), where=where,
-                              order='nickname, lastname, firstname, middlename'))
+                              order='lastname, firstname, middlename'))
     # 3. название книги
     books = list(_db.select('books', locals(), where='title'+tsquery,
                             order='title'))
