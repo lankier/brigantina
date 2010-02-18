@@ -8,7 +8,7 @@ import logging
 import logging.handlers
 from lxml import etree
 from xml.sax.saxutils import escape
-from markdown import markdown
+import markdown
 from unidecode import unidecode
 
 from config import xslt_dir, books_dir, log_file
@@ -81,7 +81,8 @@ def text2annotation(txt):
     return '<annotation xmlns="http://www.gribuser.ru/xml/fictionbook/2.0">\n'+ann+'\n</annotation>'
 
 def text2html(txt):
-    return markdown(txt)
+    md = markdown.Markdown(safe_mode='escape')
+    return md.convert(txt)
 
 def mime_type(path):
     if not os.path.exists(path):
