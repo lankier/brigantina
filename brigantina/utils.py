@@ -80,8 +80,8 @@ def text2annotation(txt):
     ann = '\n'.join(ann)
     return '<annotation xmlns="http://www.gribuser.ru/xml/fictionbook/2.0">\n'+ann+'\n</annotation>'
 
-def text2html(txt):
-    md = markdown.Markdown(safe_mode='escape')
+def text2html(txt, safe_mode='escape'):
+    md = markdown.Markdown(safe_mode=safe_mode)
     return md.convert(txt)
 
 def mime_type(path):

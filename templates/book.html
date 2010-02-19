@@ -23,8 +23,9 @@ $if book.year:
   <span class="bookyear">($book.year)</span>
 </h1>
 $if book.covers:
+  $ cover = book.covers[0]
   <div style="clear:right; float:right; padding-left:15px">
-  <img src="/cover/$book.covers[0].fileid" alt="Cover"/>
+  <img src="/files/$cover.fileid/$cover.filename" alt="Cover"/>
   </div>
 
 <div class="authors">

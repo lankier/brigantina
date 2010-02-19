@@ -42,7 +42,6 @@ pages_urls = (
     '/genre', 'AllGenresPage',
     '/recentchanges', 'RecentChangesPage',
     '/viewoldvalue/(\\d+)', 'ViewOldValuePage',
-    '/cover/(\\d+)', 'Cover',
     '/booksearch', 'BookSearch',
     '/reviews', 'AllReviewPage',
     '/editreview/(\\d+)', 'EditReviewPage',
@@ -77,15 +76,6 @@ class StaticFiles:
         while data:
             data = fd.read(1024)
             yield data
-
-class Cover:
-    '''обложки'''
-    def GET(self, fileid):
-        cover = libdb.get_cover(fileid)
-        if not cover:
-            raise web.notfound()
-        path = os.path.join('/', books_dir, fileid, cover)
-        raise web.redirect(path)
 
 class BookPage:
     def GET(self, bookid):

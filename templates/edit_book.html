@@ -102,12 +102,8 @@ $if book.sequences:
 </form>
 
 <h3>Обложки</h3>
-<ul>
 $for c in book.covers:
-  <li>$c.fileid / $c.filename</li>
-</ul>
-$for c in book.covers:
-  <img src="/cover/$c.fileid" alt="Cover">
+  <img src="/files/$c.fileid/$c.filename" alt="Cover"/>
 
 <h3>Аннотация</h3>
 $:book.annotation
