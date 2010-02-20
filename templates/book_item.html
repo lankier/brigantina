@@ -20,8 +20,8 @@ $if 'genres' in book:
     $if not loop.last: ,
   )
 $# аннотация
-$if 'annotation' in book:
-  $:book.annotation
+$if 'annotation_html' in book:
+  $:book.annotation_html
 $# файлы
 $if 'files' in book and book.files:
   <ul>

@@ -388,87 +388,65 @@ def add_sequence(itemid, sequencename, sequencenumber, publish=False):
 def add_images(fileid, images, covers):
     images = pickle.dumps(images)
     covers = pickle.dumps(covers)
-    try:
-        _db.select('filesdesc', locals(), where='fileid = $fileid')[0]
-    except IndexError:
-        _db.insert('filesdesc', False, images=images, covers=covers,
-                   fileid=fileid)
-    else:
-        _db.update('filesdesc', vars=locals(), images=images, covers=covers,
-                   where='fileid = $fileid')
+    _db.update('files', vars=locals(), images=images, covers=covers,
+               where='id = $fileid')
 
-def _add_ann(table, column, id, ann, html, force=False):
+def _add_ann(table, id, ann, html, force=False):
     old = False
-    where = '%s=$id' % column
-    try:
-        res = _db.select(table, locals(), where=where)[0]
-    except IndexError:
+    res = _db.select(table, locals(), where='id = $id')[0]
+    if res.annotation and force:
+        # обновление
+        old = res.annotation
+        _db.update(table, where='id = $id', annotation=ann, annotation_html=html,
+                   vars=locals())
+    elif not res.annotation:
         # аннотация отсутствует
-        vars = {column: id, 'annotation': ann, 'annotation_html': html}
-        _db.insert(table, False, **vars)
-    else:
-        if force or not res.annotation:
-            # обновление или пустая аннотация
-            old = res.annotation
-            _db.update(table, where=where, annotation=ann, annotation_html=html,
-                       vars=locals())
+        _db.update(table, where='id = $id', annotation=ann, annotation_html=html,
+                   vars=locals())
     if old:
-        s = u'книги' if column == 'bookid' else u'файла'
-        db_log(u'изменена аннотация '+s, oldvalue=old, needupdate=True,
-               **{column: id})
+        if table == 'books':
+            db_log(u'изменена аннотация книги', needupdate=True, oldvalue=old,
+                   bookid=id)
+        else:
+            db_log(u'изменена аннотация файла', needupdate=True, oldvalue=old,
+                   fileid=id)
     else:
-        s = u'книге' if column == 'bookid' else u'файлу'
-        db_log(u'добавлена аннотация к '+s, needupdate=True, **{column: id})
+        if table == 'books':
+            db_log(u'добавлена аннотация к книге', needupdate=True, bookid=id)
+        else:
+            db_log(u'добавлена аннотация к файлу', needupdate=True, fileid=id)
 
 def add_book_desc(bookid, fileid, ann, html):
     '''добавление аннотации'''
-    _add_ann('booksdesc', 'bookid', bookid, ann, html)
-    _add_ann('filesdesc', 'fileid', fileid, ann, html)
+    _add_ann('books', bookid, ann, html)
+    _add_ann('files', fileid, ann, html)
 
 def update_book_ann(bookid, ann, html=None):
     '''обновление аннотации книги'''
     if html is None:
         html = annotation2html(ann)
-    _add_ann('booksdesc', 'bookid', bookid, ann, html, force=True)
+    _add_ann('books', bookid, ann, html, force=True)
 
 def update_file_ann(fileid, ann, html=None):
     '''обновление аннотации файла'''
     if html is None:
         html = annotation2html(ann)
-    _add_ann('filesdesc', 'fileid', fileid, ann, html, force=True)
+    _add_ann('files', fileid, ann, html, force=True)
 
 def save_file_description(fileid, desc):
     '''сохранение fb2 description'''
-    try:
-        res = _db.select('filesdesc', locals(), where='fileid = $fileid')[0]
-    except IndexError:
-        _db.insert('filesdesc', False, fileid=fileid, description=desc)
-    else:
-        _db.update('filesdesc', vars=locals(),
-                   where='fileid = $fileid', description=desc)
+    _db.update('files', vars=locals(), where='id = $fileid', description=desc)
 
 ## ----------------------------------------------------------------------
 ## ф-ции для page.py
 ## ----------------------------------------------------------------------
 
 def book_get_ann(bookid, column='annotation_html'):
-    try:
-        ann = _db.select('booksdesc', locals(), where='bookid = $bookid',
-                         what=column)[0][column]
-    except IndexError:
+    ann = _db.select('books', locals(), where='id = $bookid',
+                     what=column)[0][column]
+    if not ann:
         ann = ''
     return ann
-
-def add_annotation_to_book(book):
-    book.annotation = book_get_ann(book.id)
-
-def add_desc_to_book(book, table='booksdesc'):
-    try:
-        desc = _db.select(table, locals(), where='bookid = $book.id')[0]
-    except IndexError:
-        pass
-    else:
-        book.update(desc)
 
 def add_authors_to_book(item, table='booksauthors', column='bookid', limit=None):
     '''добавляет список авторов к книге
@@ -527,8 +505,6 @@ def get_book(bookid, add_hidden_files=False):
         book = _db.select('books', locals(), where='id = $bookid')[0]
     except IndexError:
         return False
-    # из booksdesc
-    add_desc_to_book(book)
     # авторы
     add_authors_to_book(book)
     # файлы
@@ -547,15 +523,10 @@ def get_book(bookid, add_hidden_files=False):
         # добавляем переводчиков
         add_authors_to_book(f, 'bookstranslators', 'fileid')
         # обложки файлов
-        try:
-            res = _db.select('filesdesc', locals(), where='fileid = $f.id')[0]
-        except IndexError:
-            pass
-        else:
-            if res.covers:
-                for c in pickle.loads(safestr(res.covers)):
-                    cover = web.Storage(fileid=f.id, filename=c)
-                    book.covers.append(cover)
+        if f.covers:
+            for c in pickle.loads(safestr(f.covers)):
+                cover = web.Storage(fileid=f.id, filename=c)
+                book.covers.append(cover)
     # другие имена
     add_alttitles_to_book(book)
     # жанры
@@ -608,7 +579,6 @@ def add_books_to_author(author, sort_by='sequence'):
         # жанры
         add_genres_to_book(b)
         add_files_to_book(b)
-        add_annotation_to_book(b)
     author.books = books
 
 def get_author(authorid, sort_by='sequence', add_books=True, add_biography=True):
@@ -649,7 +619,6 @@ def add_books_to_sequence(sequence):
     for b in books:
         add_authors_to_book(b, limit=1)
         add_files_to_book(b)
-        add_annotation_to_book(b)
     sequence.books = books
 
 def get_sequence(sequenceid):
@@ -681,7 +650,6 @@ def get_genre(genreid, page, limit=100):
     for b in books:
         add_authors_to_book(b, limit=1)
         add_files_to_book(b)
-        add_annotation_to_book(b)
     genre.books = books
     return genre, numpages, count
 
@@ -718,11 +686,7 @@ def get_file(fileid):
     add_books_to_file(file)
     add_sequences_to_book(file, 'filessequences', 'publsequences', 'fileid')
     if file.filetype == 'fb2':
-        try:
-            file.desc = _db.select('filesdesc', locals(),
-                                   where='fileid = $fileid')[0].description
-        except IndexError:
-            file.desc = ''
+        file.desc = file.description
         try:
             res = _db.select('fb2errors', locals(), where='fileid = $fileid')[0]
         except:
@@ -743,18 +707,6 @@ def get_file_info(fileid):
 def get_need_update(file):
     if file.needupdate:
         return True
-    
-
-def get_cover(fileid):
-    try:
-        res = _db.select('filesdesc', locals(), where='fileid = $fileid',
-                         what='covers')[0]
-    except IndexError:
-        return False
-    if not res.covers:
-        return False
-    covers = pickle.loads(safestr(res.covers))
-    return covers[0]
 
 def get_genres_list():
     return _db.select('genres')
@@ -1306,11 +1258,8 @@ def file_update_filename(fileid, fn):
     _db.update('files', where='id = $fileid', filename=fn, vars=locals())
 
 def file_get_images(fileid, what='images'):
-    try:
-        res = _db.select('filesdesc', locals(), where='fileid = $fileid',
-                         what=what)[0]
-    except IndexError:
-        raise DBError(u'такого файла нет')
+    res = _db.select('files', locals(), where='fileid = $fileid',
+                     what=what)[0]
     images = pickle.loads(safestr(res[what]))
     return images
 
@@ -1409,7 +1358,6 @@ def get_new_books(page=None, limit=100):
     for b in newbooks:
         add_genres_to_book(b)
         add_authors_to_book(b, limit=1)
-        add_annotation_to_book(b)
         add_files_to_book(b)
     return newbooks, numpages
 

@@ -2,7 +2,7 @@ $def with (file)
 $var title: FB2 description файла $file.title
 <h1>FB2 description файла $file.title</h1>
 <div>
-$for s in file.desc.splitlines():
+$for s in file.description.splitlines():
   $ n, t = s.split(':', 1)
   <b>$n</b>: $t<br/>
 </div>

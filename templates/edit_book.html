@@ -106,7 +106,7 @@ $for c in book.covers:
   <img src="/files/$c.fileid/$c.filename" alt="Cover"/>
 
 <h3>Аннотация</h3>
-$:book.annotation
+$:book.annotation_html
 <form action="/editbook/$book.id/editann" method="POST">
   <button name="submit" type="submit">Редактировать аннотацию</button>
 </form>

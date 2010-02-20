@@ -14,18 +14,12 @@ create table books (
   permission int default 0,     -- 0 - полный доступ
   deleted boolean default false,
   needupdate boolean default false,
-  primary key (id)
-);
--- доп. инф-ция о книге (см. также filesdesc)
-drop table if exists booksdesc cascade;
-create table booksdesc (
-  bookid int not null references books(id),
   annotation text default '',   -- fb2
   annotation_html text default '', -- преобразован в html (кэширование)
-  content text default '',
-  content_html text default '',
+  --content text default '',
+  --content_html text default '',
   covers text,                -- обложки добавленные через сайт (имена файлов)
-  unique (bookid)
+  primary key (id)
 );
 -- другие названия книг
 drop table if exists alttitles cascade;
@@ -61,6 +55,13 @@ create table files (
   origext text,        -- оригинальное расширение файла (с точкой, для не fb2)
   filename text,       -- имя файла транслитом (для fb2 без расширения)
   needupdate boolean default false,
+  annotation text default '',   -- fb2
+  annotation_html text default '', -- преобразован в html (кэширование)
+  --content text default '',
+  --content_html text default '',
+  description text default '',  -- fb2 description
+  covers text,                  -- обложки (имена файлов) (pickled)
+  images text,                  -- все изображения (включая обложки) (pickled)
   primary key (id),
   unique (md5)
 );
@@ -70,19 +71,6 @@ create table booksfiles (
   fileid int not null references files(id),
   hidden boolean default false, -- показывать ли файл в этой книге
   unique (bookid, fileid)
-);
--- доп. инф-ция из fb2
-drop table if exists filesdesc cascade;
-create table filesdesc (
-  fileid int not null references files(id),
-  annotation text default '',   -- fb2
-  annotation_html text default '', -- преобразован в html (кэширование)
-  content text default '',
-  content_html text default '',
-  description text default '',  -- fb2 description
-  covers text,                  -- обложки (имена файлов) (pickled)
-  images text,                  -- все изображения (включая обложки) (pickled)
-  unique (fileid)
 );
 --
 -- жанры
@@ -226,7 +214,8 @@ create table actions (
   publsequenceid int,
   genreid text,
   pages text,
-  valuechanged boolean default false
+  valuechanged boolean default false,
+  primary key (id)
 );
 drop table if exists oldvalues cascade;
 create table oldvalues (

@@ -34,8 +34,8 @@ $for a in book.authors:
   $if not loop.last: ,
 </div>
 
-$if book.annotation:
-  $:book.annotation $# не эскепить html
+$if book.annotation_html:
+  $:book.annotation_html
 
 <h3>Файлы</h3>
 <ul>
