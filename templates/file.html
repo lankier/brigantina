@@ -20,12 +20,6 @@ $:chunkrender.page_tab(file.id, 'file', '')
 <b>Добавлен в библиотеку:</b> $file.added<br/>
 </p>
 
-<h3>Переводчики</h3>
-<ul>
-$for tr in file.translators:
-  <li><a href="/author/$tr.id">$authorname(tr)</a></li>
-</ul>
-
 <h3>Связанные с файлом книги</h3>
 <ul>
 $for b in file.books:

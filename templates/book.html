@@ -33,6 +33,14 @@ $for a in book.authors:
   <a href="/author/$a.id">$authorname(a)</a>\
   $if not loop.last: ,
 </div>
+<div class="translators">
+$if book.translators:
+  (пер: \
+  $for tr in book.translators:
+    <a href="/author/$tr.id">$authorname(tr)</a>\
+    $if not loop.last: , \
+  )
+</div>
 
 $if book.annotation_html:
   $:book.annotation_html
@@ -42,12 +50,6 @@ $if book.annotation_html:
 $for f in book.files:
   $if not f.hidden:
     <li><a href="/file/$f.id">$f.title</a>
-    $if f.translators:
-      (пер:
-      $for tr in f.translators:
-        <a href="/author/$tr.id">$authorname(tr)</a>\
-        $if not loop.last: ,
-      )
     ($f.filetype) ($f.textsize)
     Скачать
     $if (f.filetype == 'fb2'):

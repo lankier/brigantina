@@ -15,6 +15,8 @@ edit_urls = (
     '/editbook/(\\d+)/settitle', 'EditBookSetTitlePage',
     '/editbook/(\\d+)/setyear', 'EditBookSetYearPage',
     '/editbook/(\\d+)/setlang', 'EditBookSetLangPage',
+    '/editbook/(\\d+)/setpublyear', 'EditBookSetPublYearPage',
+    '/editbook/(\\d+)/setpubllang', 'EditBookSetPublLangPage',
     # добавление/удаление доп. названий
     '/editbook/(\\d+)/addalttitle', 'EditBookAddAltTitlePage',
     '/editbook/(\\d+)/delalttitle', 'EditBookDelAltTitlePage',
@@ -22,6 +24,10 @@ edit_urls = (
     '/editbook/(\\d+)/addauthor', 'EditBookAddAuthorPage',
     '/editbook/(\\d+)/addauthor/(\\d+)', 'EditBookAddAuthorPage',
     '/editbook/(\\d+)/delauthor', 'EditBookDelAuthorPage',
+    # переводчики
+    '/editbook/(\\d+)/addtranslator', 'EditBookAddTranslatorPage',
+    '/editbook/(\\d+)/addtranslator/(\\d+)', 'EditBookAddTranslatorPage',
+    '/editbook/(\\d+)/deltranslator', 'EditBookDelTranslatorPage',
     #'/editbook/(\\d+)/delauthor/(\\d+)', 'EditBookDelAuthorPage',
     # добавление/удаление жанров
     '/editbook/(\\d+)/addgenre', 'EditBookAddGenrePage',
@@ -31,6 +37,8 @@ edit_urls = (
     # добавление/удаление авторских сериалов
     '/editbook/(\\d+)/addsequence', 'EditBookAddSequencePage',
     '/editbook/(\\d+)/delsequence', 'EditBookDelSequencePage',
+    '/editbook/(\\d+)/addpublsequence', 'EditBookAddPublSequencePage',
+    '/editbook/(\\d+)/delpublsequence', 'EditBookDelPublSequencePage',
     # манипуляции с файлами
     '/editbook/(\\d+)/addfile', 'EditBookAddFilePage',
     '/editbook/(\\d+)/addfile/(\\d+)', 'EditBookAddFilePage',
@@ -49,12 +57,6 @@ edit_urls = (
     #### страница редактирования файла
     '/editfile/(\\d+)', 'EditFilePage',
     '/editfile/(\\d+)/settitle', 'EditFileSetTitlePage',
-    '/editfile/(\\d+)/setyear', 'EditFileSetYearPage',
-    '/editfile/(\\d+)/addtranslator', 'EditFileAddTranslatorPage',
-    '/editfile/(\\d+)/addtranslator/(\\d+)', 'EditFileAddTranslatorPage',
-    '/editfile/(\\d+)/deltranslator', 'EditFileDelTranslatorPage',
-    '/editfile/(\\d+)/addsequence', 'EditFileAddSequencePage',
-    '/editfile/(\\d+)/delsequence', 'EditFileDelSequencePage',
     #### страница редактирования автора
     '/editauthor/(\\d+)', 'EditAuthorPage',
     '/editauthor/(\\d+)/setname', 'EditAuthorSetNamePage',
@@ -282,10 +284,24 @@ class EditBookSetYearPage:
         _set_year(bookid, year)
     POST = GET
 
+class EditBookSetPublYearPage:
+    def GET(self, bookid, year=None):
+        check_access('edit_book', bookid)
+        return _set_year(bookid, year, '/editbook/',
+                         libdb.edit_book_set_publ_year)
+    POST = GET
+
 class EditBookSetLangPage:
     def GET(self, bookid, lang=None):
         check_access('edit_book', bookid)
         _set_lang(bookid, lang)
+    POST = GET
+
+class EditBookSetPublLangPage:
+    def GET(self, bookid, lang=None):
+        check_access('edit_book', bookid)
+        return _set_lang(bookid, lang, '/editbook/',
+                         libdb.edit_book_set_publ_lang)
     POST = GET
 
 class EditBookAddAltTitlePage:
@@ -330,6 +346,25 @@ class EditBookDelAuthorPage:
     def GET(self, bookid, authorid=None):
         check_access('edit_book', bookid)
         return _del_author(bookid, authorid)
+    POST = GET
+
+class EditBookAddTranslatorPage:
+    def GET(self, bookid, authorid=None):
+        check_access('edit_book', bookid)
+        return _add_author(bookid, authorid,
+                           seeother='/editbook/',
+                           addurl='/addtranslator/',
+                           what=u'Переводчик',
+                           add_author_func=libdb.edit_book_add_translator)
+    POST = GET
+
+class EditBookDelTranslatorPage:
+    def GET(self, bookid, authorid=None):
+        check_access('edit_book', bookid)
+        return _del_author(bookid, authorid,
+                           seeother='/editbook/',
+                           what=u'Переводчик',
+                           del_author_func=libdb.edit_book_del_translator)
     POST = GET
 
 class EditBookAddGenrePage:
@@ -390,6 +425,29 @@ class EditBookDelSequencePage:
             session.message = u'Сериал удалён'
             raise web.seeother('/editbook/'+bookid)
         return render.edit_book_error(bookid, u'Ошибка', u'Не найден сериал')
+    POST = GET
+
+class EditFileAddSequencePage:
+    def GET(self, fileid, sequenceid=None):
+        check_access('edit_file', fileid)
+        return _add_sequence(fileid, sequenceid,
+                             publish=True, seeother='/editfile/')
+    POST = GET
+
+class EditFileDelSequencePage:
+    def GET(self, fileid, sequenceid=None):
+        check_access('edit_file', fileid)
+        i = web.input()
+        if 'sequenceid' in i:
+            sequenceid = i.sequenceid
+        if sequenceid:
+            try:
+                libdb.edit_file_del_sequence(fileid, sequenceid)
+            except libdb.DBError, err:
+                return render.edit_file_error(fileid, u'Ошибка', err)
+            session.message = u'Серия удалена'
+            raise web.seeother('/editfile/'+fileid)
+        return render.edit_file_error(fileid, u'Ошибка', u'Не найдена серия')
     POST = GET
 
 class EditBookEditAnnPage:
@@ -576,57 +634,4 @@ class EditFileSetTitlePage:
         return _set_title(fileid, title, '/editfile/', libdb.edit_file_set_title)
     POST = GET
 
-class EditFileSetYearPage:
-    def GET(self, fileid, year=None):
-        check_access('edit_file', fileid)
-        return _set_year(fileid, year, '/editfile/', libdb.edit_file_set_year)
-    POST = GET
-
-class EditFileSetLangPage:
-    def GET(self, fileid, lang=None):
-        check_access('edit_file', fileid)
-        return _set_lang(fileid, lang, '/editfile/', libdb.edit_file_set_lang)
-    POST = GET
-
-class EditFileAddTranslatorPage:
-    def GET(self, fileid, authorid=None):
-        check_access('edit_file', fileid)
-        return _add_author(fileid, authorid,
-                           seeother='/editfile/',
-                           addurl='/addtranslator/',
-                           what=u'Переводчик',
-                           add_author_func=libdb.edit_file_add_translator)
-    POST = GET
-
-class EditFileDelTranslatorPage:
-    def GET(self, fileid, authorid=None):
-        check_access('edit_file', fileid)
-        return _del_author(fileid, authorid,
-                           seeother='/editfile/',
-                           what=u'Переводчик',
-                           del_author_func=libdb.edit_file_del_translator)
-    POST = GET
-
-class EditFileAddSequencePage:
-    def GET(self, fileid, sequenceid=None):
-        check_access('edit_file', fileid)
-        return _add_sequence(fileid, sequenceid,
-                             publish=True, seeother='/editfile/')
-    POST = GET
-
-class EditFileDelSequencePage:
-    def GET(self, fileid, sequenceid=None):
-        check_access('edit_file', fileid)
-        i = web.input()
-        if 'sequenceid' in i:
-            sequenceid = i.sequenceid
-        if sequenceid:
-            try:
-                libdb.edit_file_del_sequence(fileid, sequenceid)
-            except libdb.DBError, err:
-                return render.edit_file_error(fileid, u'Ошибка', err)
-            session.message = u'Серия удалена'
-            raise web.seeother('/editfile/'+fileid)
-        return render.edit_file_error(fileid, u'Ошибка', u'Не найдена серия')
-    POST = GET
 

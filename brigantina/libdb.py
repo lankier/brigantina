@@ -75,28 +75,37 @@ def db_log(action, oldvalue=None, strvalue=None, needupdate=False, **kwargs):
     fileid = kwargs.get('fileid')
     authorid = kwargs.get('authorid')
     sequenceid =  kwargs.get('sequenceid')
-    if bookid:
-        _db.update('books', vars=locals(), needupdate=True,
-                   where='id = $bookid')
+    publsequenceid =  kwargs.get('publsequenceid')
+    files = set()                      # список id файлов требующих обновления
+    def _add_files(bookid):
+        for f in _db.select('booksfiles', locals(), what='fileid',
+                            where='bookid = $bookid'):
+            files.add(f.fileid)
     if fileid:
-        _db.update('files', vars=locals(), needupdate=True,
-                   where='id = $fileid')
+        files.add(fileid)
+    if bookid:
+        _add_files(bookid)
     # если автор - помечаем все его книги
     if authorid:
         for r in _db.select('booksauthors', locals(),
                             where='authorid = $authorid'):
-            _db.update('books', vars=locals(), needupdate=True,
-                       where='id = $r.bookid')
+            _add_files(r.bookid)
         for r in _db.select('bookstranslators', locals(),
                             where='authorid = $authorid'):
-            _db.update('files', vars=locals(), needupdate=True,
-                       where='id = $r.fileid')
+            _add_files(r.bookid)
     # все книги сериала
     if sequenceid:
         for r in _db.select('bookssequences', locals(),
                             where='sequenceid = $sequenceid'):
-            _db.update('books', vars=locals(), needupdate=True,
-                       where='id = $r.bookid')
+            _add_files(r.bookid)
+    # изд. серии
+    if publsequenceid:
+        for r in _db.select('bookspublsequences', locals(),
+                            where='sequenceid = $sequenceid'):
+            _add_files(r.bookid)
+    # помечаем все затронутые файлы
+    for f in files:
+        _db.update('files', vars=locals(), needupdate=True, where='id = $f')
 
 def reset_need_update(bookid=None, fileid=None):
     '''сбросить флаг needupdate'''
@@ -125,6 +134,10 @@ def undo(actionid):
             edit_book_set_year, ['bookid']),
         u'изменён язык книги': (
             edit_book_set_lang, ['bookid']),
+        u'изменён год издания': (
+            edit_book_set_publ_year, ['bookid']),
+        u'изменён язык издания': (
+            edit_book_set_publ_lang, ['bookid']),
         u'из книги удалено альтернативное название': (
             edit_book_add_alttitle, ['bookid']),
         u'изменено название сериала': (
@@ -133,10 +146,6 @@ def undo(actionid):
             edit_sequence_set_number, ['sequenceid', 'bookid']),
         u'изменён заголовок файла': (
             edit_file_set_title, ['fileid']),
-        u'изменён год издания': (
-            edit_file_set_year, ['fileid']),
-        u'изменён язык издания': (
-            edit_file_set_lang, ['fileid']),
         u'у автора изменено имя': (
             edit_author_set_name, {'authorid': None, 'firstname': 'oldvalue'}),
         u'у автора изменено отчество': (
@@ -153,14 +162,14 @@ def undo(actionid):
             edit_book_add_genre, ['bookid']),
         u'из книги удалён автор': (
             edit_book_add_author, ['bookid']),
+        u'из книги удалён переводчик': (
+            edit_book_add_translator, ['bookid']),
         u'из книги удалён файл': (
             edit_book_add_file, ['bookid']),
         u'из книги удалён сериал': (
             edit_book_add_sequence, ['bookid', 'sequenceid']),
-        u'из файла удалён сериал': (
-            edit_file_add_sequence, ['fileid', 'publsequenceid']),
-        u'в файле удалён переводчик': (
-            edit_file_add_translator, ['fileid']),
+        u'из книги удалена издательская серия': (
+            edit_book_add_publ_sequence, ['bookid', 'publsequenceid']),
         }
     try:
         res = _db.select('actions', locals(), where='id = $actionid')[0]
@@ -340,10 +349,10 @@ def add_sequence(itemid, sequencename, sequencenumber, publish=False):
     if publish:
         # издательская серия
         sequencetable = 'publsequences'
-        relattable = 'filessequences'
-        where = ('fileid = $itemid and sequenceid = $sequenceid and '
+        relattable = 'bookspublsequences'
+        where = ('bookid = $itemid and sequenceid = $sequenceid and '
                  'sequencenumber = $sequencenumber')
-        check_where = 'fileid = $itemid and sequenceid = $sequenceid'
+        check_where = 'bookid = $itemid and sequenceid = $sequenceid'
     else:
         # авторский сериал
         sequencetable = 'sequences'
@@ -373,16 +382,14 @@ def add_sequence(itemid, sequencename, sequencenumber, publish=False):
     else:
         # существует запись (bookid, sequenceid)
         raise DBError(u'Сериал уже добавлен.')
+    _db.insert(relattable, False, bookid=itemid,
+               sequenceid=sequenceid, sequencenumber=sequencenumber)
     if publish:
-        _db.insert(relattable, False, fileid=itemid,
-                   sequenceid=sequenceid, sequencenumber=sequencenumber)
-        db_log(u'в файл добавлена издательская серия', publsequenceid=sequenceid,
-               fileid=itemid, needupdate=True)
+        db_log(u'в книгу добавлена издательская серия', publsequenceid=sequenceid,
+               bookid=itemid, needupdate=True)
     else:
-        _db.insert(relattable, False, bookid=itemid,
-                   sequenceid=sequenceid, sequencenumber=sequencenumber)
-        db_log(u'в книгу добавлен сериал', sequenceid=sequenceid, bookid=itemid,
-               needupdate=True)
+        db_log(u'в книгу добавлен сериал', sequenceid=sequenceid,
+               bookid=itemid, needupdate=True)
     return (sequenceid, newseq)
 
 def add_images(fileid, images, covers):
@@ -448,16 +455,15 @@ def book_get_ann(bookid, column='annotation_html'):
         ann = ''
     return ann
 
-def add_authors_to_book(item, table='booksauthors', column='bookid', limit=None):
-    '''добавляет список авторов к книге
-    или список переводчиков к файлу'''
+def add_authors_to_book(item, table='booksauthors', limit=None):
+    '''добавляет список авторов или переводчиков к книге'''
     query = ('select authors.* from %(table)s, authors '
              'where %(table)s.authorid = authors.id '
-             'and %(table)s.%(column)s = $item.id' % locals())
+             'and %(table)s.bookid = $item.id' % locals())
     if limit is not None:
         query += (' limit %d' % limit)
     authors = list(_db.query(query, vars=locals()))
-    if column == 'bookid':
+    if table == 'booksauthors':
         item.authors = authors
     else:
         item.translators = authors
@@ -475,8 +481,8 @@ def add_files_to_book(book, hidden=True):
                            'and booksfiles.bookid = $book.id'''+where,
                            vars=locals()))
     book.files = files
+    add_authors_to_book(book, 'bookstranslators')
     for f in files:
-        add_authors_to_book(f, 'bookstranslators', 'fileid')
         f.filetype = f.filetype.strip()
 
 def add_genres_to_book(book):
@@ -485,16 +491,15 @@ def add_genres_to_book(book):
                             'and booksgenres.bookid = $book.id', vars=locals()))
     book.genres = genres
 
-def add_sequences_to_book(item, table='bookssequences',
-                          seqtable='sequences', column='bookid'):
+def add_sequences_to_book(item, table='bookssequences', seqtable='sequences'):
     '''добавляет сериалы к книге или файлу'''
     query = ('select %(seqtable)s.name, %(seqtable)s.id, '
              '%(table)s.sequencenumber as number '
              'from %(table)s, %(seqtable)s '
              'where %(table)s.sequenceid = %(seqtable)s.id '
-             'and %(table)s.%(column)s = $item.id' % locals())
+             'and %(table)s.bookid = $item.id' % locals())
     sequences = list(_db.query(query, vars=locals()))
-    item.sequences = sequences
+    item[seqtable] = sequences
 
 def add_alttitles_to_book(book):
     alttitles = list(_db.select('alttitles', locals(), where='bookid = $book.id'))
@@ -520,19 +525,21 @@ def get_book(bookid, add_hidden_files=False):
     else:
         book.covers = []
     for f in book.files:
-        # добавляем переводчиков
-        add_authors_to_book(f, 'bookstranslators', 'fileid')
         # обложки файлов
         if f.covers:
             for c in pickle.loads(safestr(f.covers)):
                 cover = web.Storage(fileid=f.id, filename=c)
                 book.covers.append(cover)
+    # добавляем переводчиков
+    add_authors_to_book(book, 'bookstranslators')
     # другие имена
     add_alttitles_to_book(book)
     # жанры
     add_genres_to_book(book)
     # авторские сериалы
     add_sequences_to_book(book)
+    # изд. серии
+    add_sequences_to_book(book, 'bookspublsequences', 'publsequences')
     return book
 
 def get_book_info(bookid):
@@ -682,9 +689,7 @@ def get_file(fileid):
     except IndexError:
         return False
     file.filetype = file.filetype.strip()
-    add_authors_to_book(file, table='bookstranslators', column='fileid')
     add_books_to_file(file)
-    add_sequences_to_book(file, 'filessequences', 'publsequences', 'fileid')
     if file.filetype == 'fb2':
         file.desc = file.description
         try:
@@ -853,6 +858,43 @@ def edit_book_del_author(bookid, authorid):
     _db.delete('booksauthors', vars=locals(),
                where='authorid = $authorid and bookid = $bookid')
     db_log(u'из книги удалён автор', bookid=bookid, authorid=authorid,
+           oldvalue=authorid, needupdate=True)
+
+def edit_book_add_translator(bookid, authorid):
+    '''добавляем переводчика в книгу'''
+    try:
+        _db.select('books', locals(), where='id = $bookid')[0]
+    except IndexError:
+        raise DBError(u'Такая книга не найдена.')
+    try:
+        _db.select('authors', locals(), where='id = $authorid')[0]
+    except IndexError:
+        raise DBError(u'Такой автор не найден.')
+    try:
+        _db.select('bookstranslators', locals(),
+                   where='bookid = $bookid and authorid = $authorid')[0]
+    except IndexError:
+        pass
+    else:
+        raise DBError(u'Такой переводчик у этой книги уже есть.')
+    _db.insert('bookstranslators', False, bookid=bookid, authorid=authorid)
+    db_log(u'в книгу добавлен переводчик', bookid=bookid, authorid=authorid,
+           needupdate=True)
+    return True
+
+def edit_book_del_translator(bookid, authorid):
+    try:
+        _db.select('bookstranslators', locals(),
+                   where='authorid = $authorid and bookid = $bookid')[0]
+    except IndexError:
+        raise DBError(u'Такого переводчика у этой книги нет')
+    try:
+        _db.select('authors', locals(), where='id = $authorid')[0]
+    except IndexError:
+        raise DBError(u'Такого автора не существует')
+    _db.delete('bookstranslators', vars=locals(),
+               where='authorid = $authorid and bookid = $bookid')
+    db_log(u'из книги удалён переводчик', bookid=bookid, authorid=authorid,
            oldvalue=authorid, needupdate=True)
 
 def edit_book_search_file(bookid, file):
@@ -1027,6 +1069,57 @@ def edit_book_del_sequence(bookid, sequenceid):
 ##             _db.delete('sequences', vars=locals(), where='id = $sequenceid')
 ##             db_log(u'удалён сериал', sequenceid=sequenceid)
 
+def edit_book_add_publ_sequence(bookid, sequenceid, sequencenumber):
+    '''добавляет издательскую серию в книгу'''
+    res = add_sequence(bookid, sequenceid, sequencenumber)
+    if not res:
+        raise DBError(u'Серия уже добавлен.')
+
+def edit_book_del_publ_sequence(bookid, sequenceid):
+    try:
+        res = _db.select('bookspublsequences', locals(),
+                         where='sequenceid = $sequenceid and bookid = $bookid')[0]
+    except IndexError:
+        raise DBError(u'Такого издательской серии у этой книги нет')
+    oldvalue = res.sequencenumber
+    _db.delete('bookspublsequences', vars=locals(),
+               where='sequenceid = $sequenceid and bookid = $bookid')
+    db_log(u'из книги удалена издательская серия', bookid=bookid,
+           publsequenceid=sequenceid, oldvalue=oldvalue, needupdate=True)
+##     # удаляем из publsequences если сериал больше ни одной книгой не используется
+##     res = _db.query('select * from bookssequences, publsequences '
+##                     'where bookssequences.sequenceid = publsequences.id '
+##                     'and publsequences.id = $sequenceid', vars=locals())
+##     try:
+##         res[0]
+##     except IndexError:
+##         _db.delete('publsequences', vars=locals(), where='id = $sequenceid')
+##         db_log(u'удалена издательская серия', publsequenceid=sequenceid)
+
+def edit_book_set_publ_year(bookid, year):
+    try:
+        old = _db.select('books', locals(), where='id = $bookid')[0].publyear
+    except IndexError:
+        return
+    _db.update('books', where='id = $bookid', publyear=year, vars=locals())
+    if old:
+        db_log(u'изменён год издания', oldvalue=old, bookid=bookid,
+               needupdate=True)
+    else:
+        db_log(u'установлен год издания', bookid=bookid, needupdate=True)
+
+def edit_book_set_publ_lang(bookid, lang):
+    try:
+        old = _db.select('books', locals(), where='id = $bookid')[0].publlang
+    except IndexError:
+        return
+    _db.update('books', where='id = $bookid', publlang=lang, vars=locals())
+    if old:
+        db_log(u'изменён язык издания', oldvalue=old, bookid=bookid,
+               needupdate=True)
+    else:
+        db_log(u'установлен язык издания', bookid=bookid, needupdate=True)
+
 ## ----------------------------------------------------------------------
 
 def edit_author_set_name(authorid, **kwargs):
@@ -1165,94 +1258,6 @@ def edit_file_set_title(fileid, title):
     _db.update('files', where='id = $fileid', title=title, vars=locals())
     db_log(u'изменён заголовок файла', oldvalue=old, fileid=fileid,
            needupdate=True)
-
-def edit_file_set_year(fileid, year):
-    try:
-        old = _db.select('files', locals(), where='id = $fileid')[0].year
-    except IndexError:
-        return
-    _db.update('files', where='id = $fileid', year=year, vars=locals())
-    if old:
-        db_log(u'изменён год издания', oldvalue=old, fileid=fileid,
-               needupdate=True)
-    else:
-        db_log(u'установлен год издания', fileid=fileid, needupdate=True)
-
-def edit_file_set_lang(fileid, lang):
-    try:
-        old = _db.select('files', locals(), where='id = $fileid')[0].lang
-    except IndexError:
-        return
-    _db.update('files', where='id = $fileid', lang=lang, vars=locals())
-    if old:
-        db_log(u'изменён язык издания', oldvalue=old, fileid=fileid,
-               needupdate=True)
-    else:
-        db_log(u'установлен язык издания', fileid=fileid, needupdate=True)
-
-def edit_file_add_translator(fileid, authorid):
-    '''добавляем переводчика в файл'''
-    try:
-        _db.select('files', locals(), where='id = $fileid')[0]
-    except IndexError:
-        raise DBError(u'Такой файл не найден.')
-    try:
-        _db.select('authors', locals(), where='id = $authorid')[0]
-    except IndexError:
-        raise DBError(u'Такой автор не найден.')
-    try:
-        _db.select('bookstranslators', locals(),
-                   where='fileid = $fileid and authorid = $authorid')[0]
-    except IndexError:
-        pass
-    else:
-        raise DBError(u'Такой переводчик у этого файла уже есть.')
-    _db.insert('bookstranslators', False, fileid=fileid, authorid=authorid)
-    db_log(u'в файл добавлен переводчик', fileid=fileid, authorid=authorid,
-           needupdate=True)
-    return True
-
-def edit_file_del_translator(fileid, authorid):
-    try:
-        _db.select('bookstranslators', locals(),
-                   where='authorid = $authorid and fileid = $fileid')[0]
-    except IndexError:
-        raise DBError(u'Такого переводчика у этого файла нет')
-    try:
-        _db.select('authors', locals(), where='id=$authorid')[0]
-    except IndexError:
-        raise DBError(u'Такого автора не существует')
-    _db.delete('bookstranslators', vars=locals(),
-               where='authorid = $authorid and fileid = $fileid')
-    db_log(u'в файле удалён переводчик', fileid=fileid, authorid=authorid,
-           oldvalue=authorid, needupdate=True)
-
-def edit_file_add_sequence(fileid, sequenceid, sequencenumber):
-    '''добавляет издательскую серию в файл'''
-    res = add_sequence(fileid, sequenceid, sequencenumber)
-    if not res:
-        raise DBError(u'Серия уже добавлен.')
-
-def edit_file_del_sequence(fileid, sequenceid):
-    try:
-        res = _db.select('filessequences', locals(),
-                         where='sequenceid = $sequenceid and fileid = $fileid')[0]
-    except IndexError:
-        raise DBError(u'Такого сериала у этой книги нет')
-    oldvalue = res.sequencenumber
-    _db.delete('filessequences', vars=locals(),
-               where='sequenceid = $sequenceid and fileid = $fileid')
-    db_log(u'из файла удалена издательская серия', fileid=fileid,
-           publsequenceid=sequenceid, oldvalue=oldvalue, needupdate=True)
-##     # удаляем из publsequences если сериал больше ни одной книгой не используется
-##     res = _db.query('select * from filessequences, publsequences '
-##                     'where filessequences.sequenceid = publsequences.id '
-##                     'and publsequences.id = $sequenceid', vars=locals())
-##     try:
-##         res[0]
-##     except IndexError:
-##         _db.delete('publsequences', vars=locals(), where='id = $sequenceid')
-##         db_log(u'удалена издательская серия', publsequenceid=sequenceid)
 
 def file_update_filename(fileid, fn):
     _db.update('files', where='id = $fileid', filename=fn, vars=locals())

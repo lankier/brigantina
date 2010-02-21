@@ -12,6 +12,13 @@ $if 'authors' in book:
   &mdash;
   $ a = book.authors[0]
   <a href="/author/$a.id">$authorname(a)</a>\
+$# переводчики
+$if 'translators' in book and book.translators:
+  (пер: \
+  $for tr in book.translators:
+    <a href="/author/$tr.id">$authorname(tr)</a>\
+    $if not loop.last: , \
+  )
 $# жанры
 $if 'genres' in book:
   (\
@@ -30,13 +37,6 @@ $if 'files' in book and book.files:
       <input name="file_$f.id" type="checkbox"></input>
     $else:
       <img src="/static/images/menu-leaf.gif"/>
-    $# переводчики
-    $if 'translators' in f and f.translators:
-      (пер:
-      $for tr in f.translators:
-        <a href="/author/$tr.id">$authorname(tr)</a>\
-        $if not loop.last: ,
-      )
     $if f.title == book.title:
       скачать  ($strsize(f.textsize)):
     $else:

@@ -222,16 +222,17 @@ def add_fb2_file(fn, errors):
     # язык оригинала - добавляется к книге
     lang = get_elem(xml, xpath_prefix, 'src-lang')
     # язык издания - добавляется к файлу
-    file_lang = get_elem(xml, xpath_prefix, 'lang')
+    publlang = get_elem(xml, xpath_prefix, 'lang')
     #   <date> (year)
     # год написания книги
     year = get_year(xml)
     # год публикации
-    file_year = get_elem(xml, '/m:FictionBook/m:description/m:publish-info', 'year')
+    publyear = get_elem(xml, '/m:FictionBook/m:description/m:publish-info',
+                        'year')
     try:
-        file_year = int(file_year)
+        publyear = int(publyear)
     except:
-        file_year = 0
+        publyear = 0
     #   <author>
     allauthors = get_authors(xml)
     if not allauthors:
@@ -263,13 +264,13 @@ def add_fb2_file(fn, errors):
     fileauthor = fileauthor
     # создаем новую книгу или добавляем файл в уже существующую
     bookid, newbook = add_book(title, allauthors, allgenres, allsequences,
-                               year=year, lang=lang)
+                               year=year, lang=lang,
+                               publyear=publyear, publlang=publlang)
     # создаём txt
     txt = plugins.fb2_to_txt(None, xml=xml)
     textsize = len(txt)
     # записываем инф-цию о файле в базу
-    bookfile = web.Storage(title=title, lang=file_lang, year=file_year,
-                           md5=md5digest, filetype='fb2',
+    bookfile = web.Storage(title=title, md5=md5digest, filetype='fb2',
                            filesize=filesize, textsize=textsize,
                            fb2id=fb2id, fb2version=fb2version,
                            fileauthor=fileauthor)
@@ -291,12 +292,12 @@ def add_fb2_file(fn, errors):
         else:
             trans.update(transids)
     for authorid in trans:
-        # добавляем связь file<->переводчик
-        libdb.edit_file_add_translator(fileid, authorid)
+        # добавляем связь книга<->переводчик
+        libdb.edit_book_add_translator(bookid, authorid)
     # добавляем издательские серии
     for seq in allpublsequences:
         try:
-            libdb.add_sequence(fileid, seq[0], seq[1], True)
+            libdb.add_sequence(bookid, seq[0], seq[1], True)
         except libdb.DBError:
             pass
     # переносим файл в нужный каталог

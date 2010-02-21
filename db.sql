@@ -8,12 +8,13 @@ create table books (
   title text not null,
   lang text default '',
   year int default 0,
+  publlang text default 'ru',
+  publyear int default 0,
   default_cover text,   -- обложка по умолчанию
   created timestamp default current_timestamp,
   modified timestamp,
   permission int default 0,     -- 0 - полный доступ
   deleted boolean default false,
-  needupdate boolean default false,
   annotation text default '',   -- fb2
   annotation_html text default '', -- преобразован в html (кэширование)
   --content text default '',
@@ -36,8 +37,6 @@ drop table if exists files cascade;
 create table files (
   id serial,
   title text default '',
-  lang text default 'ru',
-  year int default 0,
   filetype text not null,
   fileauthor text default '',
   filesize int not null,
@@ -134,9 +133,9 @@ create table authorsaliases (
 -- переводчики (связаны с файлами, а не книгами)
 drop table if exists bookstranslators cascade;
 create table bookstranslators (
-  fileid int not null references files(id),
+  bookid int not null references books(id),
   authorid int not null references authors(id),
-  unique (fileid, authorid)
+  unique (bookid, authorid)
 );
 -- биографии авторов
 drop table if exists authorsdesc cascade;
@@ -179,14 +178,14 @@ create table publsequences (
   primary key (id),
   unique (name)
 );
--- связь publsequences <-> files
-drop table if exists filessequences cascade;
-create table filessequences (
-  fileid int not null references files(id),
+-- связь publsequences <-> books
+drop table if exists bookspublsequences cascade;
+create table bookspublsequences (
+  bookid int not null references books(id),
   sequenceid int not null references publsequences(id),
   sequencenumber int not null,
   parrent int,
-  unique (fileid, sequenceid, sequencenumber)
+  unique (bookid, sequenceid, sequencenumber)
 );
 --
 -- пользователи, сессии и прочее

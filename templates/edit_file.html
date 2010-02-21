@@ -11,42 +11,6 @@ $:chunkrender.page_tab(file.id, 'file', 'edit')
 <button name="submit" type="submit">Сохранить название</button>
 </form>
 
-<form method="POST" action="/editfile/$file.id/setyear">
-<b>Год издания:</b> <input name="year" value="$file.year">
-<button name="submit" type="submit">Сохранить год</button>
-</form>
-
-<form method="POST" action="/editfile/$file.id/setlang">
-<b>Язык издания:</b> <input name="lang" value="$file.lang">
-<button name="submit" type="submit">Сохранить язык</button>
-</form>
-
-<h3>Переводчики</h3>
-<ul>
-$for a in file.translators:
-  <li><form action="/editfile/$file.id/deltranslator" method="POST">
-  <a href="/author/$a.id">$authorname(a)</a>
-  <input name="authorid" value="$a.id" type="hidden">
-  <button name="submit" type="submit">Удалить переводчика</button>
-  </form></li>
-</ul>
-<form action="/editfile/$file.id/addtranslator" method="POST">
-  <button name="submit" type="submit">Добавить переводчика</button>
-</form>
-
-<h3>Издательские серии</h3>
-$if file.sequences:
-  <ul>
-  $for s in file.sequences:
-    <li><form action="/editfile/$file.id/delsequence" method="POST">
-    <a href="/publsequence/$s.id">$s.name</a> - $s.number
-    <input name="sequenceid" value="$s.id" type="hidden">
-    <button name="submit" type="submit">Удалить серию</button>
-    </form></li>
-  </ul>
-<form action="/editfile/$file.id/addsequence" method="POST">
-  <button name="submit" type="submit">Добавить серию</button>
-</form>
 
 
 
