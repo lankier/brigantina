@@ -1,0 +1,32 @@
+$def with (err='', captcha='')
+$var title: Регистрация
+<h1>Регистрация</h1>
+$if err:
+  <p class="error">$err</p>
+<div id="register">
+  <form method="POST">
+    <table>
+    <tr>
+      <th><label for="username">Имя:</label></th>
+      <td><input type="text" id="username" name="username"/></td>
+    </tr>
+    <tr>
+      <th><label for="password">Пароль:</label></th>
+      <td><input type="password" id="password" name="password"/></td>
+    </tr>
+    <tr>
+      <th><label for="password2">Повторите пароль:</label></th>
+      <td><input type="password" id="password2" name="password2"/></td>
+    </tr>
+    <tr>
+      <th><label for="email">Электронная почта:</label></th>
+      <td><input type="text" id="email" name="email"/></td>
+    </tr>
+    <tr>
+      <th><label for="submit"></label></th>
+      <td><button type="submit" id="submit" name="submit">Отправить</button></td>
+    </tr>
+    </table>
+  </form>
+</div>
+
