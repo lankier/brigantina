@@ -190,6 +190,15 @@ create table bookspublsequences (
 --
 -- пользователи, сессии и прочее
 --
+drop table if exists users cascade;
+create table users (
+  username text unique not null,
+  password text,
+  email text,
+  regtime timestamp default current_timestamp,
+  confirmid text,
+  active boolean default true
+);
 drop table if exists sessions cascade;
 create table sessions (
   session_id text unique not null,

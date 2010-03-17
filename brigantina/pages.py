@@ -7,10 +7,10 @@ import zipfile
 import web
 form = web.form
 
-from config import books_dir
+from config import books_dir, confirm
 from utils import text2html, mime_type, book_filename, strsize
 import libdb
-from session import check_access, check_password
+from session import check_access, check_password, get_user, register_user, get_confirm_id, confirm_registration
 import addfile
 import upload
 import plugins
@@ -25,6 +25,8 @@ pages_urls = (
     '/read/(\\d+)', 'ReadPage',
     '/login', 'Login',
     '/logout', 'Logout',
+    '/register', 'Register',
+    '/confirm/(.*)', 'Confirm',
     '/addbook', 'AddBookPage',
     '/addauthor', 'AddAuthorPage',
     '/book/(\\d+)', 'BookPage',
@@ -362,6 +364,35 @@ class Logout:
     def GET(self):
         session.kill()
         raise web.seeother('/')
+
+class Register:
+    def GET(self):
+        return render.register()
+    def POST(self):
+        i = web.input()
+        if not i.username or not i.password or not i.email:
+            return render.register(u'Все поля обязательные.')
+        if i.password != i.password2:
+            return render.register(u'Пароли не совпадают.')
+        if get_user(i.username):
+            return render.register(u'Такой пользователь уже есть.')
+        if not confirm['available']:
+            register_user(i.username, i.password, i.email)
+            session.username = i.username
+            raise web.seeother('/')
+        confirmid = get_confirm_id()
+        register_user(i.username, i.password, i.email, confirmid)
+        curl = 'http://'+confirm['host']+'/confirm/'+confirmid
+        web.sendmail(confirm['email'], i.email,
+                     confirm['subject'], (confirm['message'] % curl))
+        return render.confirm()
+
+class Confirm:
+    def GET(self, confirmid):
+        res = confirm_registration(confirmid)
+        if res:
+            return render.confirm(u'Регистрация завершена.')
+        return render.confirm(u'Ошибка. Такой пользователь отсутствует.')
 
 class UserPage:
     def GET(self, username):

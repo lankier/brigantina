@@ -107,14 +107,9 @@ def db_log(action, oldvalue=None, strvalue=None, needupdate=False, **kwargs):
     for f in files:
         _db.update('files', vars=locals(), needupdate=True, where='id = $f')
 
-def reset_need_update(bookid=None, fileid=None):
+def reset_need_update(fileid):
     '''сбросить флаг needupdate'''
-    if bookid:
-        _db.update('books', vars=locals(), needupdate=False,
-                   where='id = $bookid')
-    else:
-        _db.update('files', vars=locals(), needupdate=False,
-                   where='id = $fileid')
+    _db.update('files', vars=locals(), needupdate=False, where='id = $fileid')
 
 def undo(actionid):
     undo_actions = {

@@ -139,17 +139,10 @@ def fb2_get(fileid, filetype):
     if file.filetype != 'fb2':
         return None
     libdb.update_download_stat(session.username, fileid, filetype)
-    needupdate = False
     if file.needupdate:
-        needupdate = True
-    else:
-        for b in file.books:
-            if b.needupdate:
-                needupdate = True
-                break
-    if needupdate:
         path = os.path.join(dir, fileid+'.fb2')
         ###update_fb2(path, file)
+        ###libdb.reset_need_update(fileid)
     fn = file.filename              # имя файла транслитом без расширения
     if not fn:
         # нет сохранённого имени файла - генерируем

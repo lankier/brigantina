@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
 # (c) Lankier mailto:lankier@gmail.com
+import sys, os, time
 import web
 from hashlib import md5
-from config import admins, drupal_db_args
+from config import admins, drupal_db_args, register_type, session_parameters
 import libdb
+
 
 class DBStore(web.session.DBStore):
     '''оптимизация под postrges'''
@@ -38,12 +40,13 @@ class DBStore(web.session.DBStore):
 ## связь с друпалом
 ## ----------------------------------------------------------------------
 
-try:
-    _drupal_db = web.database(**drupal_db_args)
-except:
-    _drupal_db = None
+if register_type == 'drupal':
+    try:
+        _drupal_db = web.database(**drupal_db_args)
+    except:
+        _drupal_db = None
 
-def check_password(username, password):
+def _drupal_check_password(username, password):
     if _drupal_db is None:
         return True
     try:
@@ -53,14 +56,64 @@ def check_password(username, password):
     digest = md5(password).hexdigest()
     return (digest == res['pass'])
 
-def get_userid(username):
-    if _drupal_db is None:
-        return ''
+## def get_userid(username):
+##     if _drupal_db is None:
+##         return ''
+##     try:
+##         res = _drupal_db.select('users', locals(), where='name=$username')[0]
+##     except IndexError:
+##         return ''
+##     return res.uid
+
+## ----------------------------------------------------------------------
+## собственная авторизация
+## ----------------------------------------------------------------------
+
+def get_user(username):
+    return libdb._db.select('users', locals(), where='username=$username')
+
+def register_user(username, password, email, confirm=None):
+    password = md5(password).hexdigest()
+    if not confirm:
+        libdb._db.insert('users', False, username=username,
+                         password=password, email=email)
+    else:
+        libdb._db.insert('users', False, username=username,
+                         password=password, email=email,
+                         confirmid=confirm, active=False)
+
+def get_confirm_id():
+    rand = os.urandom(16)
+    now = time.time()
+    id = md5("%s%s%s%s" % (rand, now, web.safestr(web.ctx.ip),
+                           session_parameters['secret_key']))
+    id = id.hexdigest()
+    return id
+
+def confirm_registration(confirmid):
     try:
-        res = _drupal_db.select('users', locals(), where='name=$username')[0]
+        res = libdb._db.select('users', locals(),
+                               where='confirmid=$confirmid')[0]
     except IndexError:
-        return ''
-    return res.uid
+        return False
+    libdb._db.update('users', vars=locals(), active=True,
+                     where='confirmid=$confirmid')
+    return True
+
+def _internal_check_password(username, password):
+    try:
+        res = libdb._db.select('users', locals(), where='username=$username')[0]
+    except IndexError:
+        return False
+    if not res.active:
+        return False
+    digest = md5(password).hexdigest()
+    return (digest == res.password)
+
+if register_type == 'drupal':
+    check_password = _drupal_check_password
+else:
+    check_password = _internal_check_password
 
 ## ----------------------------------------------------------------------
 ## функции проверки доступа

@@ -320,6 +320,8 @@ def add_fb2_file(fn, errors):
     save_description(xml, fileid)
     # сохраняем ошибки валидации
     libdb.save_fb2_errors(fileid, errors)
+    # сбрасываем флаг needupdate
+    libdb.reset_need_update(fileid)
     session.hide_username = False
     return bookid, fileid, newbook
 
