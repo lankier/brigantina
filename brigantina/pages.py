@@ -392,7 +392,7 @@ class Confirm:
     def GET(self, confirmid):
         res = confirm_registration(confirmid)
         if res:
-            session.username = res.username
+            #session.username = res.username
             return render.confirm(u'Регистрация завершена.')
         return render.confirm(u'Ошибка. Такой пользователь отсутствует.')
 

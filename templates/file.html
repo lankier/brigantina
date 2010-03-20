@@ -8,8 +8,6 @@ $:chunkrender.page_tab(file.id, 'file', '')
 <h3>Свойства файла</h3>
 
 <p>
-<b>Язык файла:</b> $file.lang<br/>
-<b>Год издания:</b> $file.year<br/>
 <b>Тип файла:</b> $file.filetype<br/>
 <b>Автор:</b> $file.fileauthor<br/>
 <b>Размер файла:</b> $(file.filesize/1024) KB<br/>
@@ -31,7 +29,7 @@ $for b in file.books:
   </li>
 </ul>
 
-$if file.sequences:
+$if 'sequences' in file and file.sequences:
   <h3>Издательские серии</h3>
   <ul>
   $for s in file.sequences:
