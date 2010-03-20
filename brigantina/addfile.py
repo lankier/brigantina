@@ -71,7 +71,10 @@ def get_authors(xml, prefix='author',
             tag = name.tag.replace(
                 '{http://www.gribuser.ru/xml/fictionbook/2.0}', '')
             if tag in tags:
-                text = name.text.strip() if name.text else ''
+                if name.text:
+                    text = name.text.strip()
+                else:
+                    text = ''
                 tag = tag.replace('-', '')
                 astor[tag] = text
         allauthors.append(astor)
@@ -186,7 +189,10 @@ def save_description(xml, fileid):
             tag = tag.replace('{http://www.gribuser.ru/xml/fictionbook/2.0}', '')
             queue.append(tag)
             path = '/'.join(queue)
-            text = ' '.join(elem.text.split()) if elem.text else ''
+            if elem.text:
+                text = ' '.join(elem.text.split())
+            else:
+                text = ''
             for n, v in elem.attrib.items():
                 n = n.replace('{http://www.w3.org/1999/xlink}', '')
                 desc.append(path + ('@%s: %s' % (n, v)))
