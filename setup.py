@@ -4,7 +4,7 @@ from distutils.core import setup
 
 setup(
     name = 'brigantina',
-    version = '0.4.2',
+    version = '0.4.3',
     url = 'http://www.flibusta.net/',
     author = 'lankier',
     author_email = 'lankier@gmail.com',

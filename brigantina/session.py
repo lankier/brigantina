@@ -69,18 +69,36 @@ def _drupal_check_password(username, password):
 ## собственная авторизация
 ## ----------------------------------------------------------------------
 
-def get_user(username):
-    return libdb._db.select('users', locals(), where='username=$username')
-
-def register_user(username, password, email, confirm=None):
-    password = md5(password).hexdigest()
-    if not confirm:
-        libdb._db.insert('users', False, username=username,
-                         password=password, email=email)
+def get_user(username=None, email=None):
+    if username:
+        if email:
+            res = libdb._db.select('users', locals(),
+                                    where='username=$username and email=$email')
+        else:
+            res = libdb._db.select('users', locals(), where='username=$username')
     else:
-        libdb._db.insert('users', False, username=username,
-                         password=password, email=email,
-                         confirmid=confirm, active=False)
+        assert email
+        res = libdb._db.select('users', locals(), where='email=$email')
+    try:
+        res = res[0]
+    except IndexError:
+        return None
+    return res
+
+def register_user(username, password=None, email=None,
+                  confirm=None, update=False):
+    password = md5(password).hexdigest()
+    if not update:
+        if not confirm:
+            libdb._db.insert('users', False, username=username,
+                             password=password, email=email)
+        else:
+            libdb._db.insert('users', False, username=username,
+                             password=password, email=email,
+                             confirmid=confirm, active=False)
+    else:
+        libdb._db.update('users', vars=locals(), confirmid=confirm,
+                     where='username=$username')
 
 def get_confirm_id():
     rand = os.urandom(16)
@@ -98,7 +116,7 @@ def confirm_registration(confirmid):
         return False
     libdb._db.update('users', vars=locals(), active=True,
                      where='confirmid=$confirmid')
-    return True
+    return res.username
 
 def _internal_check_password(username, password):
     try:

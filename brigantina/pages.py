@@ -24,6 +24,7 @@ pages_urls = (
     '/download/(\\d+)/(.+)', 'DownloadPage',
     '/read/(\\d+)', 'ReadPage',
     '/login', 'Login',
+    '/login/forgot', 'ForgotPassword',
     '/logout', 'Logout',
     '/register', 'Register',
     '/confirm/(.*)', 'Confirm',
@@ -391,8 +392,19 @@ class Confirm:
     def GET(self, confirmid):
         res = confirm_registration(confirmid)
         if res:
+            session.username = res.username
             return render.confirm(u'Регистрация завершена.')
         return render.confirm(u'Ошибка. Такой пользователь отсутствует.')
+
+class ForgotPassword:
+    def GET(self):
+        return render.forgot()
+    def POST(self):
+        i = web.input()
+        if not i.username or not i.email:
+            return render.forgot(u'Все поля обязательные.')
+        confirmid = get_confirm_id()
+        pass
 
 class UserPage:
     def GET(self, username):
