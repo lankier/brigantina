@@ -1269,7 +1269,7 @@ def book_search(query):
     n = 0                               # кол-во найденного
     tsquery = "@@plainto_tsquery('russian', $query)"
     # 1. авторы
-    where="(firstname||' '||middlename||' '||lastname||' '||nickname)"+tsquery
+    where="to_tsvector(firstname||' '||middlename||' '||lastname||' '||nickname)"+tsquery
     authors = list(_db.select('authors', locals(), where=where,
                               order='lastname, firstname, middlename'))
     n = len(authors)
@@ -1277,7 +1277,8 @@ def book_search(query):
     aliases = list(_db.select('authorsaliases', locals(), where=where,
                               order='lastname, firstname, middlename'))
     # 3. название книги
-    books = list(_db.select('books', locals(), where='title'+tsquery,
+    books = list(_db.select('books', locals(),
+                            where='to_tsvector(title)'+tsquery,
                             order='title'))
     for b in books:
         add_authors_to_book(b, limit=1)
@@ -1286,12 +1287,13 @@ def book_search(query):
     alttitles = list(_db.query(
         'select books.*, alttitles.title as alttitle '
         'from books, alttitles where books.id = alttitles.bookid '
-        'and alttitles.title'+tsquery, vars=locals()))
+        'and to_tsvector(alttitles.title)'+tsquery, vars=locals()))
     for b in alttitles:
         add_authors_to_book(b, limit=1)
     n += len(alttitles)
     # 5. авторские сериалы
-    sequences = list(_db.select('sequences', locals(), where='name'+tsquery,
+    sequences = list(_db.select('sequences', locals(),
+                                where='to_tsvector(name)'+tsquery,
                                 order='name'))
     n += len(sequences)
     # издательские серии
