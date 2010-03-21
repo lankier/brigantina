@@ -85,20 +85,13 @@ def get_user(username=None, email=None):
         return None
     return res
 
-def register_user(username, password=None, email=None,
-                  confirm=None, update=False):
-    password = md5(password).hexdigest()
+def register_user(username, update=False, **kw):
+    if 'password' in kw:
+        kw['password'] = md5(kw['password']).hexdigest()
     if not update:
-        if not confirm:
-            libdb._db.insert('users', False, username=username,
-                             password=password, email=email)
-        else:
-            libdb._db.insert('users', False, username=username,
-                             password=password, email=email,
-                             confirmid=confirm, active=False)
+        libdb._db.insert('users', False, username=username, **kw)
     else:
-        libdb._db.update('users', vars=locals(), confirmid=confirm,
-                     where='username=$username')
+        libdb._db.update('users', vars=locals(), where='username=$username', **kw)
 
 def get_confirm_id():
     rand = os.urandom(16)

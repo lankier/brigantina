@@ -1,0 +1,51 @@
+$def with (what=None, confirmid='', err='')
+$var title: Напоминание пароля
+<h1>Напоминание пароля</h1>
+$if err:
+  <p class="error">$err</p>
+$if what is None:
+  <div id="register">
+  Введите имя пользователя и адрес электронной почты.
+  <form method="POST">
+    <table>
+    <tr>
+      <th><label for="username">Имя:</label></th>
+      <td><input type="text" id="username" name="username"/></td>
+    </tr>
+    <tr>
+      <th><label for="email">Электронная почта:</label></th>
+      <td><input type="text" id="email" name="email"/></td>
+    </tr>
+    <tr>
+      <th><label for="submit"></label></th>
+      <td><button type="submit" id="submit" name="submit">Отправить</button></td>
+    </tr>
+    </table>
+  </form>
+  </div>
+$elif what == 'confirm':
+  <div><p>На ваш адрес электронной почты было послано письмо. Для изменения
+  пароля пройдите по ссылке, указанной в письме.</p></div>
+$elif what == 'update':
+  <div id="register">
+  Введите новый пароль.
+  <form method="POST">
+    <input name="confirmid" value="$confirmid" type="hidden" />
+    <table>
+    <tr>
+      <th><label for="password">Пароль:</label></th>
+      <td><input type="password" id="password" name="password"/></td>
+    </tr>
+    <tr>
+      <th><label for="password2">Повторите пароль:</label></th>
+      <td><input type="password" id="password2" name="password2"/></td>
+    </tr>
+    <tr>
+      <th><label for="submit"></label></th>
+      <td><button type="submit" id="submit" name="submit">Отправить</button></td>
+    </tr>
+    </table>
+  </form>
+  </div>
+$elif what == 'done':
+  <p>Пароль успешно обновлён.</p>

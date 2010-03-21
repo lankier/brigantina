@@ -25,6 +25,7 @@ pages_urls = (
     '/read/(\\d+)', 'ReadPage',
     '/login', 'Login',
     '/login/forgot', 'ForgotPassword',
+    '/login/forgot/(.+)', 'ForgotPassword',
     '/logout', 'Logout',
     '/register', 'Register',
     '/confirm/(.*)', 'Confirm',
@@ -378,11 +379,12 @@ class Register:
         if get_user(i.username):
             return render.register(u'Такой пользователь уже есть.')
         if not confirm['available']:
-            register_user(i.username, i.password, i.email)
+            register_user(i.username, password=i.password, email=i.email)
             session.username = i.username
             raise web.seeother('/')
         confirmid = get_confirm_id()
-        register_user(i.username, i.password, i.email, confirmid)
+        register_user(i.username, password=i.password, email=i.email,
+                      confirmid=confirmid)
         curl = 'http://'+confirm['host']+'/confirm/'+confirmid
         web.sendmail(confirm['email'], i.email,
                      confirm['subject'], (confirm['message'] % curl))
@@ -397,14 +399,38 @@ class Confirm:
         return render.confirm(u'Ошибка. Такой пользователь отсутствует.')
 
 class ForgotPassword:
-    def GET(self):
-        return render.forgot()
-    def POST(self):
+    def GET(self, confirmid=None):
+        if not confirmid:
+            # первое обращение - запрашиваем имя и email
+            return render.forgot()
+        # третье обращение - запрашиваем новый пароль
+        res = confirm_registration(confirmid)
+        if res:
+            return render.forgot('update', confirmid=confirmid)
+        return render.confirm(u'Ошибка. Такой пользователь отсутствует.')
+    def POST(self, confirmid=None):
         i = web.input()
-        if not i.username or not i.email:
-            return render.forgot(u'Все поля обязательные.')
-        confirmid = get_confirm_id()
-        pass
+        if not confirmid:
+            # второе обращение - отсылаем email
+            if not i.username or not i.email:
+                return render.forgot(err=u'Все поля обязательные.')
+            if not get_user(i.username, i.email):
+                return render.forgot(err=u'Неправильное имя пользователя или адрес электронной почты.')
+            confirmid = get_confirm_id()
+            # изменяем сохранённый confirmid
+            register_user(i.username, update=True, confirmid=confirmid)
+            curl = 'http://'+confirm['host']+'/login/forgot/'+confirmid
+            web.sendmail(confirm['email'], i.email,
+                         confirm['subject'], (confirm['message'] % curl))
+            return render.forgot('confirm')
+        # четвёртое обращение - сохраняем новый пароль
+        username = confirm_registration(confirmid)
+        if not username:
+            return render.forgot(u'Ошибка. Такой пользователь отсутствует.')
+        if not i.password or i.password != i.password2:
+            return render.forgot('update', err=u'Неправильный пароль.')
+        register_user(username, update=True, password=i.password)
+        return render.forgot('done')
 
 class UserPage:
     def GET(self, username):
