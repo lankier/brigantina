@@ -392,9 +392,9 @@ class Register:
 
 class Confirm:
     def GET(self, confirmid):
-        res = confirm_registration(confirmid)
-        if res:
-            #session.username = res.username
+        username = confirm_registration(confirmid)
+        if username:
+            session.username = username
             return render.confirm(u'Регистрация завершена.')
         return render.confirm(u'Ошибка. Такой пользователь отсутствует.')
 
@@ -430,6 +430,7 @@ class ForgotPassword:
         if not i.password or i.password != i.password2:
             return render.forgot('update', err=u'Неправильный пароль.')
         register_user(username, update=True, password=i.password)
+        session.username = username
         return render.forgot('done')
 
 class UserPage:
