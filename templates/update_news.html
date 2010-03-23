@@ -1,0 +1,17 @@
+$def with (news='', err='')
+$if news:
+  $ title = news.title
+  $ body = news.body
+$else:
+  $ title = ''
+  $ body = ''
+$if err:
+  <p class="error">$err</p>
+$var title: Написать новость
+<h1>Написать новость</h1>
+<form method="POST">
+  <b>Заголовок:</b> <input name="title" value="$title" size="50"><br/>
+  <textarea name="body" cols="72" rows="12">$body</textarea><br/>
+  <button name="submit" type="submit" id="submit">Отправить</button>
+</form>
+

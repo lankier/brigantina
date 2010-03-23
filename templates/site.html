@@ -97,6 +97,8 @@ $if context.username:
   <li class="leaf"><a href="/upload">Залить файл</a></li>
   <li class="leaf"><a href="/addbook">Добавить описание книги</a></li>
   <li class="leaf"><a href="/addauthor">Добавить описание автора</a></li>
+  $if access('admin'):
+    <li class="leaf"><a href="/addnews">Добавить новость</a></li>
   </ul>
   </div>
 </div>

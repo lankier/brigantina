@@ -1,6 +1,22 @@
-$def with ()
+$def with (news)
 $var title: Добро пожаловать
+<!--
 <h1>Добро пожаловать,
 $if context.username: $context.username
 $else: гость
 </h1>
+-->
+<h1>Новости</h1>
+$for n in news:
+  <div class="news">
+  <h2>$n.title</h2>
+  $:n.html
+  <span class="newstime">Опубликовал $n.username
+  <em>($strtime(n.ctime, 'sec'))</em>
+  $if access('admin'):
+    | <a href="/editnews/$n.id">Изменить</a>
+    | <a href="/deletenews/$n.id">Удалить</a>
+  </span> 
+  </div>
+  $if not loop.last:
+    <hr/><br/>

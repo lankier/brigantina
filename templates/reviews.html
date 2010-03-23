@@ -7,7 +7,7 @@ $for r in reviews:
   <span class="reviewtime">| $strtime(r.ctime, 'sec')
   $if r.ctime != r.mtime:
     <em>(изменено $strtime(r.mtime, 'sec'))</em>
-  $if r.username == context.username:
+  $if access('admin') or r.username == context.username:
     | <a href="/editreview/$r.id">Изменить</a>
     | <a href="/deletereview/$r.id">Удалить</a>
   </span>

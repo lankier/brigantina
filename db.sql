@@ -293,3 +293,18 @@ create table watchlist (
   what text not null,           -- значения: 'authorid', 'bookid', ...
   itemid int not null           -- id соответствующего объекта
 );
+--
+--
+--
+drop table if exists news cascade;
+create table news (
+  id serial,
+  username text not null,                    -- автор
+  ctime timestamp default current_timestamp, -- время создания
+  mtime timestamp default current_timestamp, -- время изменения
+  title text not null,
+  body text,
+  html text
+);
+
+

@@ -1621,6 +1621,25 @@ def change_review(reviewid, body, html):
 def delete_review(reviewid):
     _db.delete('reviews', vars=locals(), where='id = $reviewid')
 
+def get_news(newsid=None):
+    if newsid is None:
+        return list(_db.select('news', order='ctime desc', limit=10))
+    return _db.select('news', locals(), where='id = $newsid')[0]
+
+def update_news(what='add', **kw):
+    # kw: title, body, html, username, newsid
+    if what == 'add':
+        # kw: title, body, html, username
+        _db.insert('news', False, **kw)
+    elif what == 'edit':
+        # kw: title, body, html, newsid
+        _db.query('update news set title = title, body = $body, '
+                  'html = $html, mtime = current_timestamp '
+                  'where id = $newsid', vars=kw)
+    elif what == 'delete':
+        # kw: newsid
+        _db.delete('news', vars=kw, where='id = $newsid')
+
 ## ----------------------------------------------------------------------
 
 if __name__ == '__main__':

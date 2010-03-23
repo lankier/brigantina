@@ -31,6 +31,9 @@ pages_urls = (
     '/confirm/(.*)', 'Confirm',
     '/addbook', 'AddBookPage',
     '/addauthor', 'AddAuthorPage',
+    '/addnews', 'AddNewsPage',
+    '/editnews/(.+)', 'EditNewsPage',
+    '/deletenews/(.+)', 'DeleteNewsPage',
     '/book/(\\d+)', 'BookPage',
     '/book/(\\d+)/upload', 'BookUploadPage',
     '/bookhistory/(\\d+)', 'BookHistoryPage',
@@ -66,7 +69,8 @@ pages_urls = (
 
 class Index:
     def GET(self):
-        return render.index()
+        news = libdb.get_news()
+        return render.index(news)
 
 class StaticFiles:
     '''не нужен если статика отдается через http-server'''
@@ -120,13 +124,41 @@ class BookPage:
                              body=review, html=html)
         return self.GET(bookid)
 
+class AddNewsPage:
+    def GET(self):
+        check_access('admin')
+        return render.update_news()
+    def POST(self):
+        check_access('admin')
+        i = web.input()
+        html = text2html(i.body)
+        libdb.update_news('add', title=i.title, body=i.body, html=html,
+                          username=session.username)
+        raise web.seeother('/')
+
+class EditNewsPage:
+    def GET(self, newsid):
+        check_access('admin')
+        news = libdb.get_news(newsid)
+        return render.update_news(news)
+    def POST(self, newsid):
+        check_access('admin')
+        i = web.input()
+        html = text2html(i.body)
+        libdb.update_news('edit', newsid=newsid,
+                          title=i.title, body=i.body, html=html)
+        raise web.seeother('/')
+
+class DeleteNewsPage:
+    pass
+
 class EditReviewPage:
     def GET(self, reviewid):
         try:
             review = libdb.get_review(reviewid)
         except IndexError:
             raise web.notfound()
-        if review.username != session.username:
+        if not access('admin') and review.username != session.username:
             raise web.forbidden(render.forbidden())
         i = web.input()
         if 'review' in i:
@@ -526,6 +558,7 @@ class AddBookPage:
         check_access('add_book')
         return render.add_new_book(libdb.get_genres_list())
     def POST(self):
+        check_access('add_book')
         i = web.input()
         for s in ('title', 'genre', 'firstname', 'lastname'):
             if s not in i or not i[s]:
@@ -546,6 +579,7 @@ class AddAuthorPage:
         check_access('add_author')
         return render.add_new_author()
     def POST(self):
+        check_access('add_author')
         i = web.input()
         for s in ('firstname', 'lastname'):
             if s not in i or not i[s]:
