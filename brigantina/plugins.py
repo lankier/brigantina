@@ -10,6 +10,7 @@ import web
 import libdb
 from utils import book_filename
 from config import books_dir, xslt_dir
+from updatefb2 import update_fb2
 
 def save_zip(out_file, out_fn, in_file, images=None, from_str=False):
     '''записываем в out_file файл in_file под именем out_fn
@@ -53,8 +54,7 @@ def fb2_to_html(html_path, fb2_path=None, xml=None,
     open(html_path, 'w').write(html)
     return html_path
 
-def fb2_to_txt(txt_path, fb2_path=None, xml=None,
-               stylesheet='totxt.xsl'):
+def fb2_to_txt(txt_path, fb2_path=None, xml=None, stylesheet='totxt.xsl'):
     '''генерирует txt и сохраняет в txt_path
     если txt_path is None - возвращает txt'''
     if not xml:
@@ -67,7 +67,7 @@ def fb2_to_txt(txt_path, fb2_path=None, xml=None,
     open(txt_path, 'w').write(txt)
     return txt_path
 
-def fb2_read(fileid, xml=None):
+def fb2_read(fileid, fb2_path, xml=None):
     '''возвращает путь к html файлу
     при отсутствии генерирует его'''
     file = libdb.get_file_info(fileid)
@@ -79,20 +79,18 @@ def fb2_read(fileid, xml=None):
     dir = os.path.join(books_dir, fileid)
     html_path = os.path.join(dir, fileid+'.html')
     if not os.path.exists(html_path):
-        fb2_path = os.path.join(dir, fileid+'.fb2')
         fb2_to_html(html_path, fb2_path, xml)
     return html_path
 
-def fb2_fb2_zip(fileid, fn):
+def fb2_fb2_zip(fileid, fb2_path, fn):
     fn += '.fb2'
     dir = os.path.join(books_dir, fileid)
     path = os.path.join(dir, fn+'.zip')
     if not os.path.exists(path):
-        fb2_path = os.path.join(dir, fileid+'.fb2')
         save_zip(path, fn, fb2_path)
     return path
 
-def fb2_html_zip(fileid, fn, xml=None):
+def fb2_html_zip(fileid, fb2_path, fn, xml=None):
     fn += '.html'
     dir = os.path.join(books_dir, fileid)
     zip_path = os.path.join(dir, fn+'.zip') # полный путь к zip
@@ -101,7 +99,6 @@ def fb2_html_zip(fileid, fn, xml=None):
     html_path = os.path.join(dir, fileid+'.html')
     if not os.path.exists(html_path):
         # если html отсутствует - создаём
-        fb2_path = os.path.join(dir, fileid+'.fb2')
         fb2_to_html(html_path, fb2_path, xml)
     # создаём zip
     images = libdb.file_get_images(fileid)
@@ -109,7 +106,7 @@ def fb2_html_zip(fileid, fn, xml=None):
     save_zip(zip_path, fn, html_path, images)
     return zip_path
 
-def fb2_txt_zip(fileid, fn, xml=None, stylesheet='totxt.xsl'):
+def fb2_txt_zip(fileid, fb2_path, fn, xml=None, stylesheet='totxt.xsl'):
     fn += '.txt'
     dir = os.path.join(books_dir, fileid)
     zip_path = os.path.join(dir, fn+'.zip') # путь к файлу с архивом
@@ -118,7 +115,6 @@ def fb2_txt_zip(fileid, fn, xml=None, stylesheet='totxt.xsl'):
     txt_path = os.path.join(dir, fileid+'.txt')
     if not os.path.exists(txt_path):
         # если txt отсутствует - создаём
-        fb2_path = os.path.join(dir, fileid+'.fb2')
         fb2_to_txt(txt_path, fb2_path, xml)
     # создаём zip
     images = libdb.file_get_images(fileid)
@@ -134,28 +130,47 @@ def fb2_get(fileid, filetype):
         return None
     dir = os.path.join(books_dir, fileid)
     file = libdb.get_file(fileid)
+    book = None
     if not file:
         return None
     if file.filetype != 'fb2':
         return None
     libdb.update_download_stat(session.username, fileid, filetype)
-    if file.needupdate:
-        path = os.path.join(dir, fileid+'.fb2')
-        ###update_fb2(path, file)
-        ###libdb.reset_need_update(fileid)
     fn = file.filename              # имя файла транслитом без расширения
     if not fn:
         # нет сохранённого имени файла - генерируем
-        book = libdb.get_book_info(file.books[0].id)
+        book = libdb.get_book(file.books[0].id)
         fn = book_filename(file, book)
         # сохраняем
         libdb.file_update_filename(fileid, fn)
-    path = os.path.join(dir, fn+'.'+filetype+'.zip')
-    if not os.path.exists(path):
+    fb2_path = os.path.join(dir, fileid+'.fb2') # путь к оригинальному fb2
+    new_path = os.path.join(dir, fileid+'-up.fb2') # путь к обновлённому fb2
+    zp = os.path.join(dir, fn+'.'+filetype+'.zip') # путь к файлу для скачивания
+    if file.needupdate:
+        if not book:
+            book = libdb.get_book(file.books[0].id)
+        # удаляем старые файлы
+        if os.path.exists(new_path):
+            os.remove(new_path)
+        if os.path.exists(zp):
+            os.remove(zp)
+        # обновляем
+        fb2 = update_fb2(fb2_path, book.id, fileid)
+        # записываем
+        open(new_path, 'w').write(fb2)
+        libdb.reset_need_update(fileid)
+        # новое имя файла
+        fn = book_filename(file, book)
+        zp = os.path.join(dir, fn+'.'+filetype+'.zip')
+        libdb.file_update_filename(fileid, fn)
+    if os.path.exists(new_path):
+        # есть обновлённый файл - используем его
+        fb2_path = new_path
+    if not os.path.exists(zp):
         # файл (zip) отсутствует - создаём
         func = globals()['fb2_'+filetype+'_zip']
-        path = func(fileid, fn)
-    return path
+        zp = func(fileid, fb2_path, fn)
+    return zp
 
 ## ----------------------------------------------------------------------
 ## функции для работы с не fb2
@@ -204,5 +219,7 @@ def other_get(fileid):
 
 
 if __name__ == '__main__':
+    session = web.Storage(username='')
+    print fb2_get('4', 'fb2')
     pass
     

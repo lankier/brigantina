@@ -34,7 +34,8 @@ def _create_logger():
     formatter = logging.Formatter(fmt)
     handler.setFormatter(formatter)
     return logger
-logger = _create_logger()
+#logger = _create_logger()
+logger = None
 
 def authorname(a):
     '''создаёт полное имя автора:
@@ -102,9 +103,9 @@ def book_filename(file, book):
     if book.sequences:
         seq = book.sequences[0]
         fn.append(_conv(seq.name))
-        fn.append(_conv(str(seq.number)))
+        fn.append(str(seq.number))
     fn.append(_conv(book.title))
-    fn.append(_conv(str(book.id)))
+    fn.append(str(file.id))
     fn = '_'.join(fn)
     for c in '|?*<>":+[]':              # invalid chars in VFAT
         fn = fn.replace(c, '')
