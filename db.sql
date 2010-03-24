@@ -267,6 +267,15 @@ create table booksratings (
   num int not null,             -- количество оценок
   sum int not null              -- сумма всех оценок
 );
+-- матрица для коллаборативной фильтрации (алгоритм slope one)
+drop table if exists matrix cascade;
+create table matrix (
+  bookid1 int not null references books(id),
+  bookid2 int not null references books(id),
+  num int,
+  sum int,
+  unique (bookid1, bookid2)
+);
 drop table if exists reviews cascade;
 create table reviews (
   id serial,

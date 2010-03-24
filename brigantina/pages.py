@@ -131,7 +131,7 @@ class AddNewsPage:
     def POST(self):
         check_access('admin')
         i = web.input()
-        html = text2html(i.body)
+        html = text2html(i.body, safe_mode=False)
         libdb.update_news('add', title=i.title, body=i.body, html=html,
                           username=session.username)
         raise web.seeother('/')
@@ -144,7 +144,7 @@ class EditNewsPage:
     def POST(self, newsid):
         check_access('admin')
         i = web.input()
-        html = text2html(i.body)
+        html = text2html(i.body, safe_mode=False)
         libdb.update_news('edit', newsid=newsid,
                           title=i.title, body=i.body, html=html)
         raise web.seeother('/')

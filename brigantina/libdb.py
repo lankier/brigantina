@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- mode: python; coding: utf-8; -*-
 # (c) Lankier mailto:lankier@gmail.com
+import sys, os
 try:
     import cPickle as pickle
 except ImportError:
@@ -1551,12 +1552,56 @@ def _update_booksratings(bookid, rating, oldrating=None):
             num = res.num + 1
         _db.update('booksratings', vars=locals(), where=where, sum=sum, num=num)
 
+def _update_matrix(action, username, bookid, rating, oldrating=0):
+    bookid1 = bookid
+    try:
+        rating1 = int(rating)
+    except:
+        rating1 = 0
+    res = _db.select('ratings', locals(), where='username = $username')
+    for r in res:
+        # проходим по всем оценкам пользователя
+        bookid2 = r.bookid
+        rating2 = r.rating
+        if action == 'insert':
+            diff = rating1 - rating2
+            n = 1
+        elif action == 'update':
+            diff = rating1 - oldrating
+            n = 0
+        else:
+            # delete
+            diff = -oldrating
+            n = -1
+        if bookid1 == bookid2:
+            continue
+        elif bookid1 > bookid2:
+            b1, b2 = bookid1, bookid2
+        else:
+            # bookid1 < bookid2
+            b1, b2 = bookid2, bookid1
+            diff = -diff
+        where='bookid1 = $b1 and bookid2 = $b2'
+        try:
+            m = _db.select('matrix', locals(), where=where)[0]
+        except IndexError:
+            _db.insert('matrix', False, bookid1=b1, bookid2=b2,
+                       num=n, sum=diff)
+        else:
+            n = m.num+n
+            if n == 0:
+                _db.delete('matrix', vars=locals(), where=where)
+            else:
+                _db.update('matrix', vars=locals(), where=where,
+                           num=n, sum=m.sum+diff)
+
 def book_set_rating(username, bookid, rating):
     where='bookid = $bookid and username = $username'
     try:
         res = _db.select('ratings', locals(), where=where)[0]
     except IndexError:
         # пользователь ещё не оценивал эту книгу
+        _update_matrix('insert', username, bookid, rating)
         if not rating:
             return
         _db.insert('ratings', False, username=username,
@@ -1567,11 +1612,13 @@ def book_set_rating(username, bookid, rating):
         # пользователь уже оценивал эту книгу и сейчас поменял оценку
         oldrating = res.rating          # старая оценка пользователя
         if rating:
+            _update_matrix('update', username, bookid, rating, oldrating)
             _db.update('ratings', vars=locals(), where=where, rating=rating)
             # обновляем booksratings
             _update_booksratings(bookid, rating, oldrating)
         else:
             # пользователь удалил свою оценку
+            _update_matrix('delete', username, bookid, rating)
             _db.delete('ratings', vars=locals(), where=where)
             _update_booksratings(bookid, 0, oldrating)
 
@@ -1646,6 +1693,8 @@ if __name__ == '__main__':
     #print book_get_ann(3, 'annotation')
     #print list(_db.select('authors', order='lastname, firstname'))
     #get_recent_changes()
-    a = web.Storage(firstname='Урсула', middlename='', lastname='Ле Гуин')
-    print find_author(a)
+    #a = web.Storage(firstname='Урсула', middlename='', lastname='Ле Гуин')
+    #print find_author(a)
+    #book_set_rating(username, bookid, rating)
+    book_set_rating(sys.argv[1], int(sys.argv[2]), int(sys.argv[3]))
 
