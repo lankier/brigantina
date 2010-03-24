@@ -1601,6 +1601,8 @@ def book_set_rating(username, bookid, rating):
         res = _db.select('ratings', locals(), where=where)[0]
     except IndexError:
         # пользователь ещё не оценивал эту книгу
+        if not rating:
+            return
         _update_matrix('insert', username, bookid, rating)
         if not rating:
             return

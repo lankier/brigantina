@@ -113,6 +113,7 @@ class BookPage:
                 except:
                     return render.error(u'Ошибка', u'Неправильный запрос',
                                         '/book/'+bookid)
+            bookid = int(bookid)
             libdb.book_set_rating(session.username, bookid, rating)
         if 'review' in i:
             # отзыв
