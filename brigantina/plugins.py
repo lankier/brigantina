@@ -67,7 +67,7 @@ def fb2_to_txt(txt_path, fb2_path=None, xml=None, stylesheet='totxt.xsl'):
     open(txt_path, 'w').write(txt)
     return txt_path
 
-def fb2_read(fileid, fb2_path, xml=None):
+def fb2_read(fileid, xml=None):
     '''возвращает путь к html файлу
     при отсутствии генерирует его'''
     file = libdb.get_file_info(fileid)
@@ -79,6 +79,7 @@ def fb2_read(fileid, fb2_path, xml=None):
     dir = os.path.join(books_dir, fileid)
     html_path = os.path.join(dir, fileid+'.html')
     if not os.path.exists(html_path):
+        fb2_path = os.path.join(dir, fileid+'.fb2')
         fb2_to_html(html_path, fb2_path, xml)
     return html_path
 

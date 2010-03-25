@@ -73,7 +73,7 @@ $if book.num:
   <p>Количество оценок: $(book.num). Средняя оценка: $(book.avg).</p>
 $:chunkrender.reviews(book.reviews, book.rating)
 $if 'same_books' in book and book.same_books:
-  <h3>Похожие книги</h3>
+  <h3>Похоже оценивают</h3>
   <ul>
   $for b in book.same_books:
     <li><a href="/book/$b.id">$b.title</a> &mdash; \
