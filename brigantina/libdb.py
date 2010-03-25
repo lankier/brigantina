@@ -1685,14 +1685,40 @@ def get_suggest(username):
     suggest.reverse()
     return suggest
 
+def get_same_books(bookid, limit=10):
+    bookid = int(bookid)
+    minrating = 4.0                     # минимальное кол-во оценок
+    avgrating = 10.0                    # средняя оценка всех книг
+    # true Bayesian estimate
+    bayes = ('(num / (num+$minrating)) * (10-abs(sum)/num)'
+             ' + ($minrating / (num+$minrating)) * $avgrating')
+    res = _db.select('matrix', locals(),
+                     what='*, '+bayes+' as r',
+                     where='bookid1 = $bookid or bookid2 = $bookid',
+                     order='r desc', limit=limit)
+    books = []
+    for r in res:
+        if r.bookid1 == bookid:
+            b = r.bookid2
+        else:
+            b = r.bookid1
+        book = get_book_info(b)
+        #book.rating = round(r.r, 3)
+        #book.num = r.num
+        #book.diff = round(float(r.sum)/r.num, 3)
+        add_authors_to_book(book)
+        books.append(book)
+    return books
+
 def get_books_rating():
     minrating = 1.0                     # минимальное кол-во оценок
     avgrating = 7.0                     # средняя оценка всех книг
     avgrating = _db.select('booksratings', what='avg(sum/num)')[0].avg
-    what = ('(num / (num+$minrating)) * (sum/num)'
-            ' + ($minrating / (num+$minrating)) * $avgrating')
+    # используем true Bayesian estimate
+    bayes = ('(num / (num+$minrating)) * (sum/num)'
+             ' + ($minrating / (num+$minrating)) * $avgrating')
     res = _db.select('booksratings', locals(),
-                     what='*, '+what+ ' as r', order='r desc')
+                     what='*, '+bayes+' as r', order='r desc')
     books = []
     for r in res:
         b = get_book_info(r.bookid)
@@ -1757,5 +1783,5 @@ if __name__ == '__main__':
     #book_set_rating(username, bookid, rating)
     #book_set_rating(sys.argv[1], int(sys.argv[2]), int(sys.argv[3]))
     #test_suggest()
-    get_books_rating()
-
+    #get_books_rating()
+    for b in get_same_books(45): print b.rating, b.num, b.diff, b.title

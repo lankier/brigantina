@@ -100,7 +100,9 @@ class BookPage:
             book.avg = round(float(book.sum) / book.num, 2)
         else:
             book.avg = 0
+        book.same_books = libdb.get_same_books(bookid)
         return render.book(book)
+
     def POST(self, bookid):
         i = web.input()
         if 'rating' in i:
