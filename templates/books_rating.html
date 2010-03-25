@@ -1,0 +1,11 @@
+$def with (books)
+$var title: Рейтинг книг
+<h1>Рейтинг книг</h1>
+<table><tr><th>Рейтинг</th><th>Книга</th></tr>
+$for b in books:
+  <tr><td>$b.rating</td>\
+  <td><a href="/book/$b.id">$b.title</a> &mdash; \
+  $ a = b.authors[0]
+  <a href="/author/$a.id">$authorname(a)</a>\
+  </td></tr>
+</table>

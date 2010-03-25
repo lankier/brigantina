@@ -59,7 +59,9 @@ pages_urls = (
     '/user/(.+)/changes', 'UserChangesPage',
     '/user/(.+)/reviews', 'UserReviewsPage',
     '/user/(.+)/ratings', 'UserRatingsPage',
+    '/user/(.+)/suggest', 'UserSuggestPage',
     '/user/(.+)', 'UserPage', # должен быть последним после всех остальных /user/smth
+    '/booksrating', 'BooksRatingPage',
     '/blockuser', 'BlockUserPage',
     '/watch/(.+)/(\\d+)', 'WatchPage',
     '/watchlist', 'WatchListPage',
@@ -478,6 +480,16 @@ class UserReviewsPage:
 class UserRatingsPage:
     def GET(self, username):
         return render.not_implemented('/user/'+username)
+
+class UserSuggestPage:
+    def GET(self, username):
+        suggest = libdb.get_suggest(username)
+        return render.suggest(username, suggest)
+
+class BooksRatingPage:
+    def GET(self):
+        books = libdb.get_books_rating()
+        return render.books_rating(books)
 
 def _watch_message(what, item, res):
     s = {

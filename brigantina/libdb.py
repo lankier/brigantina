@@ -1649,6 +1649,58 @@ def book_get_user_opinion(username, bookid):
     reviews = _get_reviews(locals(), 'bookid = $bookid')
     return (totalsum, totalnum, rating, reviews)
 
+def get_suggest(username):
+    mybooks = set()
+    mymatrix = {}
+    res = _db.select('ratings', locals(), where='username = $username')
+    for r in res:
+        bookid = r.bookid
+        rating = r.rating
+        mybooks.add(bookid)
+        mat = _db.select('matrix', locals(),
+                         where='bookid1 = $bookid or bookid2 = $bookid')
+        for m in mat:
+            if m.bookid1 == bookid:
+                diffitem = m.bookid2
+            else:
+                diffitem = m.bookid1
+            freq = m.num
+            diffrating = float(m.sum)/m.num
+            mymatrix.setdefault(diffitem, [0, 0.0])
+            mymatrix[diffitem][0] += freq
+            mymatrix[diffitem][1] += freq * (diffrating + rating)
+    #
+    suggest = []
+    for bookid in mymatrix:
+        if bookid in mybooks:
+            continue
+        if mymatrix[bookid][0] == 0:
+            continue
+        book = get_book_info(bookid)
+        add_authors_to_book(book)
+        book.rating = round(rating, 2)
+        rating = mymatrix[bookid][1] / mymatrix[bookid][0]
+        suggest.append((rating, book))
+    suggest.sort()
+    suggest.reverse()
+    return suggest
+
+def get_books_rating():
+    minrating = 1.0                     # минимальное кол-во оценок
+    avgrating = 7.0                     # средняя оценка всех книг
+    avgrating = _db.select('booksratings', what='avg(sum/num)')[0].avg
+    what = ('(num / (num+$minrating)) * (sum/num)'
+            ' + ($minrating / (num+$minrating)) * $avgrating')
+    res = _db.select('booksratings', locals(),
+                     what='*, '+what+ ' as r', order='r desc')
+    books = []
+    for r in res:
+        b = get_book_info(r.bookid)
+        add_authors_to_book(b)
+        b.rating = round(r.r, 3)
+        books.append(b)
+    return books
+
 def file_get_user_opinion(username, fileid):
     reviews = _get_reviews(locals(), 'fileid = $fileid')
     return reviews
@@ -1691,12 +1743,19 @@ def update_news(what='add', **kw):
 
 ## ----------------------------------------------------------------------
 
+def test_suggest():
+    suggest = get_suggest('admin')
+    n = 0
+    for rating, book in suggest:
+        print '=>', round(rating, 3), book.id, book.title
+        n += 1
+
 if __name__ == '__main__':
-    #print book_get_ann(3, 'annotation')
-    #print list(_db.select('authors', order='lastname, firstname'))
     #get_recent_changes()
     #a = web.Storage(firstname='Урсула', middlename='', lastname='Ле Гуин')
     #print find_author(a)
     #book_set_rating(username, bookid, rating)
-    book_set_rating(sys.argv[1], int(sys.argv[2]), int(sys.argv[3]))
+    #book_set_rating(sys.argv[1], int(sys.argv[2]), int(sys.argv[3]))
+    #test_suggest()
+    get_books_rating()
 

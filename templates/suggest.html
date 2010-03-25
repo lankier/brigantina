@@ -1,0 +1,7 @@
+$def with (username, suggest)
+$var title: Рекоммендации для пользователя $username
+<h1>Рекоммендации для пользователя $username</h1>
+$for rating, book in suggest:
+  <b>$rating</b>
+  $:chunkrender.book_item(book)
+
