@@ -7,7 +7,6 @@ $:chunkrender.page_tab(sequence.id, 'sequence', '')
 <form method="POST" action="/download">
 $for b in sequence.books:
   $:chunkrender.book_item(b)
-$if access('many_download'):
-  <button name="submit" type="submit" id="submit">Скачать всё выбранное</button>
+$:chunkrender.many_download_buttons()
 <input name="back" value="/sequence/$sequence.id" type="hidden">
 </form>

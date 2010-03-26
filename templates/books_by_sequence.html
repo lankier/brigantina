@@ -23,7 +23,6 @@ $# закрываем теги
 $if prevsequence:
   </div>
 </div>
-$if access('many_download'):
-  <button name="submit" type="submit" id="submit">Скачать всё выбранное</button>
+$:chunkrender.many_download_buttons()
 <input name="back" value="/author/$author.id" type="hidden">
 </form>

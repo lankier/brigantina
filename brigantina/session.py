@@ -138,8 +138,7 @@ def access(what, itemid=None):
     if what == 'many_download':
         if not session.username:
             return False
-        # не реализовано
-        return False
+        return True
     if not session.username:
         # глобальный запрет для анонимных пользователей
         return False

@@ -2,8 +2,8 @@
 # -*- mode: python; coding: utf-8; -*-
 # (c) Lankier mailto:lankier@gmail.com
 import sys, os
+from hashlib import md5
 from urlparse import urlparse
-import zipfile
 import web
 form = web.form
 
@@ -612,22 +612,31 @@ class ManyDownloadPage:
     def POST(self):
         check_access('many_download')
         i = web.input()
+        filetype = i.format
+        fids = []
         files = []
         for k in i:
             if i[k] != 'on':
                 continue
-            if k.startswith('file_'):
-                fileid = k[5:]
-            try:
-                fileid = int(fileid)
-            except ValueError:
-                continue
-            files.append(fileid)
+            if k.startswith('fb2_'):
+                fileid = k[4:]
+                fids.append(fileid)
+                path = plugins.fb2_get(fileid, filetype)
+            elif k.startswith('oth_'):
+                fileid = k[4:]
+                fids.append(fileid)
+                path = plugins.other_get(fileid)
+            files.append(path)
         if not files:
             return render.error(u'Ничего не выбрано',
                                 u'Список для скачивания пуст',
                                 i.get('back'))
-        return files
+        fids.sort()
+        out_file = md5('-'.join(fids)).hexdigest()+'.'+filetype+'.zip'
+        out_file = os.path.join(books_dir, 'many', out_file)
+        if not os.path.exists(out_file):
+            plugins.save_zip_many(files, out_file)
+        return render.many_download('/'+out_file)
 
 class DownloadPage:
     def GET(self, fileid, filetype):

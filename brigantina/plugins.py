@@ -30,6 +30,12 @@ def save_zip(out_file, out_fn, in_file, images=None, from_str=False):
             fn = os.path.basename(i)
             zf.write(i, fn, zipfile.ZIP_DEFLATED)
 
+def save_zip_many(files, out_file):
+    zf = zipfile.ZipFile(out_file, 'w', zipfile.ZIP_STORED)
+    for f in files:
+        fn = os.path.basename(f)
+        zf.write(f, fn, zipfile.ZIP_DEFLATED)
+
 ## ----------------------------------------------------------------------
 ## функции для работы с fb2
 ## ----------------------------------------------------------------------
@@ -156,7 +162,7 @@ def fb2_get(fileid, filetype):
         if os.path.exists(zp):
             os.remove(zp)
         # обновляем
-        fb2 = update_fb2(fb2_path, book.id, fileid)
+        fb2 = update_fb2(fb2_path, book, fileid)
         # записываем
         open(new_path, 'w').write(fb2)
         libdb.reset_need_update(fileid)

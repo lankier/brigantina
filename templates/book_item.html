@@ -34,7 +34,10 @@ $if 'files' in book and book.files:
   <ul>
   $for f in book.files:
     $if download:
-      <input name="file_$f.id" type="checkbox"></input>
+      $if f.filetype == 'fb2':
+        <input name="fb2_$f.id" type="checkbox"></input>
+      $else:
+        <input name="oth_$f.id" type="checkbox"></input>
     $else:
       <img src="/static/images/menu-leaf.gif"/>
     $if f.title == book.title:

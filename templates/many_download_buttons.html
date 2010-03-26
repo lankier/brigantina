@@ -1,0 +1,8 @@
+$def with ()
+$if access('many_download'):
+  Формат:
+  <select id="format" name="format">
+  $for ff in fb2_formats:
+    <option value="$ff">$ff</option>
+  </select>
+  <button name="submit" type="submit" id="submit">Скачать всё выбранное</button>
