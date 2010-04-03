@@ -60,6 +60,7 @@ pages_urls = (
     '/user/(.+)/reviews', 'UserReviewsPage',
     '/user/(.+)/ratings', 'UserRatingsPage',
     '/user/(.+)/suggest', 'UserSuggestPage',
+    '/user/(.+)/newbooksprefs', 'UserNewBooksPrefsPage',
     '/user/(.+)', 'UserPage', # должен быть последним после всех остальных /user/smth
     '/booksrating', 'BooksRatingPage',
     '/blockuser', 'BlockUserPage',
@@ -488,6 +489,26 @@ class UserSuggestPage:
         suggest = libdb.get_suggest(username)
         return render.suggest(username, suggest)
 
+class UserNewBooksPrefsPage:
+    def GET(self, username):
+        if session.username != username:
+            raise web.forbidden(render.forbidden())
+        prefs = libdb.get_user_prefs(username)
+        return render.new_books_prefs(prefs)
+    def POST(self, username):
+        if session.username != username:
+            raise web.forbidden(render.forbidden())
+        i = web.input()
+        genres = ','.join(s.strip() for s in i.genrelist.split(','))
+        if i.genre == 'ignore':
+            genres = '-' + genres
+        else:
+            genres = '+' + genres
+        prefs = web.Storage(genres=genres, filetypes='', langs='')
+        libdb.set_user_prefs(username, prefs)
+        session.message = u'Настройки сохранены'
+        return render.new_books_prefs(prefs)
+
 class BooksRatingPage:
     def GET(self):
         books = libdb.get_books_rating()
@@ -680,7 +701,8 @@ class NewBooksPage:
     def GET(self):
         i = web.input()
         page = int(i.get('page', 1))
-        newbooks, numpages = libdb.get_new_books(page-1)
+        prefs = libdb.get_user_prefs(session.username)
+        newbooks, numpages = libdb.get_new_books(page-1, filter=prefs)
         return render.new_books(newbooks, page, numpages+1)
 
 class NewFilesPage:

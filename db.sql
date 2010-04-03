@@ -199,6 +199,13 @@ create table users (
   confirmid text,
   active boolean default true
 );
+drop table if exists usersprefs cascade;
+create table usersprefs (
+  username text unique not null,
+  genres text,
+  langs text,
+  filetypes text
+);
 drop table if exists sessions cascade;
 create table sessions (
   session_id text unique not null,
@@ -315,5 +322,3 @@ create table news (
   body text,
   html text
 );
-
-

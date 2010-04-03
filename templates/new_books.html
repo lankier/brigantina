@@ -1,6 +1,8 @@
 $def with (books, page, numpages)
 $var title: Новые книги
 <h1>Новые книги в библиотеке</h1>
+$if context.username:
+  <!--<p><a href="/user/$context.username/newbooksprefs">Настроить просмотр новых книг.</a></p>-->
 $ prev_date = None
 <form method="POST" action="/download">
 $for b in books:

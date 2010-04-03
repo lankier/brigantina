@@ -1351,7 +1351,7 @@ def get_statistics():
     files = _db.select('files', what='count(*)')[0].count
     return web.Storage(authors=authors, books=books, files=files)
 
-def get_new_books(page=None, limit=100):
+def get_new_books(page=None, limit=100, filter=None):
     numpages, count, newbooks = _paging_select(
         'select books.*',
         "from books, actions where actions.bookid = books.id "
@@ -1766,6 +1766,23 @@ def update_news(what='add', **kw):
     elif what == 'delete':
         # kw: newsid
         _db.delete('news', vars=kw, where='id = $newsid')
+
+def get_user_prefs(username):
+    if not username:
+        return None
+    try:
+        return _db.select('usersprefs', locals(), where='username = $username')[0]
+    except IndexError:
+        return web.Storage(genres='', filetypes='', langs='')
+
+def set_user_prefs(username, prefs):
+    try:
+        res = _db.select('usersprefs', locals(), where='username = $username')[0]
+    except IndexError:
+        prefs['username'] = username
+        _db.insert('usersprefs', False, **prefs)
+    else:
+        _db.update('usersprefs', where='username = $username', **prefs)
 
 ## ----------------------------------------------------------------------
 

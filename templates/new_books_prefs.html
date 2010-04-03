@@ -1,0 +1,43 @@
+$def with (prefs, msg='')
+$var title: Настройка показа новых книг
+<h1>Настройка показа новых книг</h1>
+$if msg: <p class="error">$err</p>
+<form method="POST">
+<fieldset>
+  <legend>Жанры</legend>
+  <select id="genre" name="genre">
+    $if prefs.genres and prefs.genres[0] == '+':
+      $ sel = 'selected'
+    $else:
+      $ sel = ''
+    <option value="ignor">Игнорировать жанры:</option>
+    <option $sel value="only">Показывать только эти жанры:</option>
+  </select>
+  <input type="text" size="32" name="genrelist" value="$prefs.genres[1:]">
+</fieldset>
+<fieldset>
+  <legend>Языки</legend>
+  <select id="lang" name="lang">
+    $if prefs.langs and prefs.langs[0] == '+':
+      $ sel = 'selected'
+    $else:
+      $ sel = ''
+    <option value="ignor">Игнорировать языки:</option>
+    <option $sel value="only">Показывать только эти языки:</option>
+  </select>
+  <input type="text" size="32" name="langlist" value="$prefs.langs[1:]">
+</fieldset>
+<fieldset>
+  <legend>Форматы</legend>
+  <select id="format" name="format">
+    $if prefs.filetypes and prefs.filetypes[0] == '+':
+      $ sel = 'selected'
+    $else:
+      $ sel = ''
+    <option value="ignor">Игнорировать форматы:</option>
+    <option $sel value="ignor">Показывать только эти форматы:</option>
+  </select>
+  <input type="text" size="32" name="formatlist" value="$prefs.filetypes[1:]">
+</fieldset>
+<button name="submit" type="submit" id="submit">Сохранить</button>
+</form>
