@@ -19,8 +19,15 @@ $for g in book.genres:
 <h1>$book.title \
 $if book.deleted:
   (книга удалена)\
-$if book.year:
-  <span class="bookyear">($book.year)</span>
+$if book.year or book.format:
+  <span class="bookyear">(\
+  $if book.format:
+    $book.format\
+    $if book.year:
+      , \
+  $if book.year:
+    $book.year\
+  )</span>
 </h1>
 $if book.covers:
   $ cover = book.covers[0]

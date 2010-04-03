@@ -17,6 +17,11 @@ $if access('admin'):
 <button name="submit" type="submit">Сохранить название</button>
 </form>
 
+<form method="POST" action="/editbook/$book.id/setformat">
+<b>Формат:</b> <input name="format" value="$book.format">
+<button name="submit" type="submit">Сохранить формат</button>
+</form>
+
 <form method="POST" action="/editbook/$book.id/setyear">
 <b>Год:</b> <input name="year" value="$book.year">
 <button name="submit" type="submit">Сохранить год</button>
