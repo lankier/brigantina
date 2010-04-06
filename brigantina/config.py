@@ -33,11 +33,10 @@ books_dir = 'files'             # где хранятся файлы книг
 xslt_dir = 'xslt'               # каталог с файлами для xsl-трансформации
 data_dir = 'data'               # каталог для доп. файлов
 
-filetypes = ('fb2', 'html', 'txt') # форматы, в которые можно преобразовать fb2
-
 schema_dir = 'schema'                     # каталог с файлами схемы fb2
 schema_file = 'FictionBook2.21.xsd'       # имя основного файла схемы
 annotation_schema_file = 'annotation.xsd' # для проверки аннотаций
+fb2_rtf_dir = 'fb2rtf'                    # путь к каталогу со скриптом
 
 session_parameters = {
     'cookie_name': 'session_id',
@@ -53,3 +52,11 @@ admins = ['admin',]
 
 # генерировать файлы из fb2 при добавлении
 generate_when_adding = True
+
+#
+# локальные настройки
+#
+try:
+    from localconfig import *
+except ImportError:
+    pass

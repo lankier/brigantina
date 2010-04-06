@@ -83,8 +83,9 @@ def update_fb2(path, book, fileid):
     title.text = title_text
     new_ti.append(title)
     # 4. <annotation>
-    ann = etree.fromstring(book.annotation)
-    new_ti.append(ann)
+    if book.annotation:
+        ann = etree.fromstring(book.annotation)
+        new_ti.append(ann)
     # 5. <keywords>
     copy_elem('keywords')
     # 6. <date>
