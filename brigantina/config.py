@@ -38,6 +38,8 @@ schema_file = 'FictionBook2.21.xsd'       # имя основного файла
 annotation_schema_file = 'annotation.xsd' # для проверки аннотаций
 fb2_rtf_dir = 'fb2rtf'                    # путь к каталогу со скриптом
 
+fb2_formats = ['fb2', 'txt', 'html', 'rtf'] # в какие форматы можно преобразовать
+
 session_parameters = {
     'cookie_name': 'session_id',
     #'cookie_domain': None,

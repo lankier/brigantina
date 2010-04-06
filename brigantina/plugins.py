@@ -10,7 +10,8 @@ import web
 
 import libdb
 from utils import book_filename
-from config import books_dir, xslt_dir, fb2_rtf_dir
+from config import books_dir, xslt_dir, fb2_rtf_dir, fb2_formats
+
 from updatefb2 import update_fb2
 
 def save_zip(out_file, out_fn, in_file, images=None, from_str=False):
@@ -40,8 +41,6 @@ def save_zip_many(files, out_file):
 ## ----------------------------------------------------------------------
 ## функции для работы с fb2
 ## ----------------------------------------------------------------------
-
-fb2_formats = ['fb2', 'txt', 'html', 'rtf'] # в какие форматы можно преобразовать
 
 def _xslt(xml, stylesheet):
     xslt = os.path.join(xslt_dir, stylesheet)

@@ -4,11 +4,10 @@
 import sys, os
 import web
 
-from config import session_parameters, log_file, templates_dir
+from config import session_parameters, log_file, templates_dir, fb2_formats
 import libdb
 from session import DBStore, access
 from utils import authorname, strtime, strsize
-from plugins import fb2_formats
 
 from edit import *
 from pages import *
