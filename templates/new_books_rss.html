@@ -1,0 +1,28 @@
+$def with (url, pageurl, books)
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Новые книги в библиотеке - Бригантина RSS Feed</title>
+    <link>$url</link>
+    <description>Новые книги в библиотеке Бригантина.</description>
+    <language>ru-ru</language>
+    $for b in books:
+      <item>
+        <title>$b.title \
+        $if 'authors' in b:
+          - $authorname(b.authors[0]) \
+        - \
+        $for g in b.genres
+          $g.description\
+          $if not loop.last: , \
+        </title>
+        <link>$pageurl/$b.id</link>
+        <description>
+        $if b.annotation:
+          <![CDATA[$:b.annotation_html]]>
+        </description>
+        <pubDate>$strtime(b.created, 'rfc')</pubDate>
+        <guid>$b.id</guid>
+      </item>
+  </channel>
+</rss>

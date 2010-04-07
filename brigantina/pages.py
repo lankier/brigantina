@@ -56,6 +56,7 @@ pages_urls = (
     '/deletereview/(\\d+)', 'DeleteReviewPage',
     '/statistics', 'StatisticsPage',
     '/newbooks', 'NewBooksPage',
+    '/newbooks/rss', 'NewBooksRSSFeed',
     '/newfiles', 'NewFilesPage',
     '/user/(.+)/changes', 'UserChangesPage',
     '/user/(.+)/reviews', 'UserReviewsPage',
@@ -712,6 +713,14 @@ class NewFilesPage:
         page = int(i.get('page', 1))
         newfiles, numpages = libdb.get_new_files(page-1)
         return render.new_files(newfiles, page, numpages+1)
+
+class NewBooksRSSFeed:
+    def GET(self):
+        web.header('Content-Type', 'application/xml')
+        newbooks, numpages = libdb.get_new_books(0, limit=10)
+        url = 'http://' + host + '/newbooks'
+        pageurl = 'http://' + host + '/book'
+        return chunkrender.new_books_rss(url, pageurl, newbooks)
 
 class NewsRSSFeed:
     def GET(self):
