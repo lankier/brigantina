@@ -139,6 +139,8 @@ def strtime(datetime, format_):
         format_ = '%Y-%m-%d %H:%M:%S'
     elif format_ == 'day':
         format_ = '%Y-%m-%d'
+    elif format_ == 'rfc':
+        format_ = '%a, %d %b %Y %H:%M:%S GMT'
     return time.strftime(format_, datetime.timetuple())
 
 def makedir(d):

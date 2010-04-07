@@ -2,6 +2,10 @@
 # -*- mode: python; coding: utf-8; -*-
 # (c) Lankier mailto:lankier@gmail.com
 
+# базовые установки
+host = '0.0.0.0:8080'
+email = 'admin@localhost.localdomain'
+
 # параметры базы данных
 db_args = dict(dbn='postgres', db='library', user='con', pw='')
 # связь с друпалом (опционально, если движок не сможет подключиться к базе,
@@ -17,7 +21,7 @@ register_type = 'internal'
 # подтверждать регистрацию
 confirm = {
     'available': True,
-    'host': '0.0.0.0:8080',
+    'host': host,
     'email': 'noreply@localhost.localdomain',
     'subject': 'Подтверждение регистрации',
     'message': '''Для подтверждения регистрации пройдите по ссылке:

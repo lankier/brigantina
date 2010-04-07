@@ -7,7 +7,7 @@ from urlparse import urlparse
 import web
 form = web.form
 
-from config import books_dir, confirm
+from config import books_dir, confirm, host
 from utils import text2html, mime_type, book_filename, strsize
 import libdb
 from session import check_access, check_password, get_user, register_user, get_confirm_id, confirm_registration
@@ -19,6 +19,7 @@ __books_dir = os.path.basename(books_dir) # FIXME: относительный п
 pages_urls = (
     '/', 'Index',
     '/('+__books_dir+'/.+)', 'StaticFiles',
+    '/rss', 'NewsRSSFeed',
     '/upload', 'Upload',
     '/download', 'ManyDownloadPage',
     '/download/(\\d+)/(.+)', 'DownloadPage',
@@ -73,7 +74,7 @@ pages_urls = (
 class Index:
     def GET(self):
         news = libdb.get_news()
-        return render.index(news)
+        return render.index(news, '/rss')
 
 class StaticFiles:
     '''не нужен если статика отдается через http-server'''
@@ -712,3 +713,10 @@ class NewFilesPage:
         newfiles, numpages = libdb.get_new_files(page-1)
         return render.new_files(newfiles, page, numpages+1)
 
+class NewsRSSFeed:
+    def GET(self):
+        web.header('Content-Type', 'application/xml')
+        news = libdb.get_news()
+        url = 'http://' + host + '/'
+        pageurl = url
+        return chunkrender.index_rss(url, pageurl, news)

@@ -1771,7 +1771,7 @@ def update_news(what='add', **kw):
         _db.insert('news', False, **kw)
     elif what == 'edit':
         # kw: title, body, html, newsid
-        _db.query('update news set title = title, body = $body, '
+        _db.query('update news set title = $title, body = $body, '
                   'html = $html, mtime = current_timestamp '
                   'where id = $newsid', vars=kw)
     elif what == 'delete':

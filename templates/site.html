@@ -10,6 +10,8 @@ $def with (content)
   <link rel="stylesheet" type="text/css" href="/static/layout.css" media="screen"/>
   <link rel="stylesheet" type="text/css" href="/static/site.css" media="screen"/>
   <link rel="stylesheet" type="text/css" href="/static/book.css" media="screen"/>
+  $if 'rss' in content:
+    <link rel="alternate" type="application/rss+xml" title="RSS 2.0" href="$content.rss" />
 </head>
 <body>
   <div id="page">

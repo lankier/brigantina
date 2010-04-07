@@ -1,0 +1,18 @@
+$def with (url, pageurl, items)
+<?xml version="1.0"?>
+<rss version="2.0">
+  <channel>
+    <title>Бригантина RSS Feed</title>
+    <link>$url</link>
+    <description>Новости библиотеки Бригантина.</description>
+    <language>ru-ru</language>
+    $for item in items:
+      <item>
+         <title>$item.title</title>
+         <link>$pageurl</link>
+         <description><![CDATA[$:item.html]]></description>
+         <pubDate>$strtime(item.ctime, 'rfc')</pubDate>
+         <guid>$item.id</guid>
+      </item>
+  </channel>
+</rss>
