@@ -3,8 +3,10 @@
 # (c) Lankier mailto:lankier@gmail.com
 
 # базовые установки
-host = '0.0.0.0:8080'
-email = 'admin@localhost.localdomain'
+site_name = 'Бригантина'
+address = '0.0.0.0'                     # 'proxy.flibusta.net'
+host = '0.0.0.0:8080'                   # 'proxy.flibusta.net:8001'
+email = 'admin@'+address
 
 # параметры базы данных
 db_args = dict(dbn='postgres', db='library', user='con', pw='')
@@ -22,7 +24,7 @@ register_type = 'internal'
 confirm = {
     'available': True,
     'host': host,
-    'email': 'noreply@localhost.localdomain',
+    'email': 'noreply@'+address,
     'subject': 'Подтверждение регистрации',
     'message': '''Для подтверждения регистрации пройдите по ссылке:
 %s''',

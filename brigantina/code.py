@@ -4,7 +4,7 @@
 import sys, os
 import web
 
-from config import session_parameters, log_file, templates_dir, fb2_formats
+from config import session_parameters, log_file, templates_dir, fb2_formats, site_name
 import libdb
 from session import DBStore, access
 from utils import authorname, strtime, strsize
@@ -48,6 +48,7 @@ _globals = {'context': session,
             'strtime': strtime,
             'strsize': strsize,
             'fb2_formats': fb2_formats,
+            'site_name': site_name,
             }
 chunkrender = web.template.render(templates_dir, globals=_globals)
 # добавляем сомого себя в globals (нужно ли использовать weakref.ref?)
