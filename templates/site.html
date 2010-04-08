@@ -70,8 +70,20 @@ $if context.username:
   </ul>
 $else:
   <h2 class="title">Гость</h2>
+  <b>Войти</b>
+  <div id="login">
+    <form method="POST" action="/login">
+      <label for="username">Пользователь:</label>
+      <input type="text" id="username" name="username"/>
+      <br />
+      <label for="password">Пароль:</label>
+      <input type="password" id="password" name="password"/>
+      <br />
+      <button type="submit" id="submit" name="submit">Отправить</button>
+    </form>
+  </div>
   <ul class="menu">
-    <li class="leaf first"><a href="/login">Зайти</a></li>
+    <!--<li class="leaf first"><a href="/login">Зайти</a></li>-->
     <li class="leaf"><a href="/login/forgot">Забыли пароль?</a></li>
     <li class="leaf"><a href="/register">Зарегистрироваться</a></li>
   </ul>
