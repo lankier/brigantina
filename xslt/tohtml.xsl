@@ -345,4 +345,30 @@
     </img>
   </div>
 </xsl:template>
+<!-- table -->
+<xsl:template match="fb:table">
+  <table border="1">
+    <xsl:apply-templates/>
+  </table>
+</xsl:template>
+<xsl:template match="fb:tr">
+  <xsl:element name="tr">
+    <xsl:if test="@align">
+      <xsl:attribute name="align">
+        <xsl:value-of select="@align"/>
+      </xsl:attribute>
+    </xsl:if>
+    <xsl:apply-templates/>
+  </xsl:element>
+</xsl:template>
+<xsl:template match="fb:th|fb:td">
+  <xsl:element name="{local-name(.)}">
+    <xsl:for-each select="@colspan|@rowspan|@align|@valign">
+      <xsl:attribute name="{local-name(.)}">
+        <xsl:value-of select="."/>
+      </xsl:attribute>
+    </xsl:for-each>
+    <xsl:apply-templates/>
+  </xsl:element>
+</xsl:template>
 </xsl:stylesheet>
