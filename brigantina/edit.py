@@ -13,7 +13,7 @@ edit_urls = (
     '/editbook/(\\d+)/block', 'EditBookBlockPage',
     # изменение названия, года, языка
     '/editbook/(\\d+)/settitle', 'EditBookSetTitlePage',
-    '/editbook/(\\d+)/setformat', 'EditBookSetFormatPage',
+    '/editbook/(\\d+)/setform', 'EditBookSetFormPage',
     '/editbook/(\\d+)/setyear', 'EditBookSetYearPage',
     '/editbook/(\\d+)/setlang', 'EditBookSetLangPage',
     '/editbook/(\\d+)/setpublyear', 'EditBookSetPublYearPage',
@@ -279,14 +279,14 @@ class EditBookSetTitlePage:
         return _set_title(bookid, title)
     POST = GET
 
-class EditBookSetFormatPage:
-    def GET(self, bookid, format=None):
+class EditBookSetFormPage:
+    def GET(self, bookid, form=None):
         check_access('edit_book', bookid)
         i = web.input()
-        if 'format' in i:
-            format = i.format
-        libdb.edit_book_set_format(bookid, format)
-        session.message = u'Формат сохранён'
+        if 'form' in i:
+            form = i.form
+        libdb.edit_book_set_form(bookid, form)
+        session.message = u'Форма сохранена'
         web.seeother('/editbook/'+bookid)
     POST = GET
 

@@ -126,8 +126,8 @@ def undo(actionid):
             update_file_ann, ['fileid']),
         u'изменено название книги': (
             edit_book_set_title, ['bookid']),
-        u'изменён формат книги': (
-            edit_book_set_format, ['bookid']),
+        u'изменена форма книги': (
+            edit_book_set_form, ['bookid']),
         u'изменён год написания книги': (
             edit_book_set_year, ['bookid']),
         u'изменён язык книги': (
@@ -727,13 +727,13 @@ def edit_book_set_title(bookid, title):
     db_log(u'изменено название книги', oldvalue=old, bookid=bookid,
            needupdate=True)
 
-def edit_book_set_format(bookid, format):
+def edit_book_set_form(bookid, form):
     try:
-        old = _db.select('books', locals(), where='id = $bookid')[0].format
+        old = _db.select('books', locals(), where='id = $bookid')[0].form
     except IndexError:
         return
-    _db.update('books', where='id = $bookid', format=format, vars=locals())
-    db_log(u'изменён формат книги', oldvalue=old, bookid=bookid)
+    _db.update('books', where='id = $bookid', form=form, vars=locals())
+    db_log(u'изменена форма книги', oldvalue=old, bookid=bookid)
     #needupdate=True)
 
 def edit_book_set_year(bookid, year):

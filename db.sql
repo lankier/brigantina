@@ -6,7 +6,7 @@ drop table if exists books cascade;
 create table books (
   id serial,
   title text not null,
-  format text,
+  form text,
   lang text default '',
   year int default 0,
   publlang text default 'ru',

@@ -19,10 +19,10 @@ $for g in book.genres:
 <h1>$book.title \
 $if book.deleted:
   (книга удалена)\
-$if book.year or book.format:
+$if book.year or book.form:
   <span class="bookyear">(\
-  $if book.format:
-    $book.format\
+  $if book.form:
+    $book.form\
     $if book.year:
       , \
   $if book.year:
