@@ -94,7 +94,7 @@ def mime_type(path):
                           ).communicate()[0]
     return mt.strip()
 
-def book_filename(file, book, translit=False):
+def book_filename(file, book, translit=True):
     '''генерирует имя файла транслитом'''
     def _conv(s):
         '''заменяет в строке пробелы на _ и преобразует её в транслит'''
