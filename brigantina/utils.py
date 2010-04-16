@@ -10,6 +10,7 @@ from lxml import etree
 from xml.sax.saxutils import escape
 import markdown
 from unidecode import unidecode
+import web
 
 from config import xslt_dir, books_dir, log_file
 
@@ -115,7 +116,7 @@ def book_filename(file, book, translit=False):
     for c in '\0|?*<>":+[]':              # invalid chars in VFAT
         fn = fn.replace(c, '')
     fn = fn[:245]
-    return fn
+    return web.utils.safestr(fn)
 
 def strsize(size):
     '''преобразует размер в человекочитаемый формат'''
