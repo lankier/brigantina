@@ -19,6 +19,7 @@ __books_dir = os.path.basename(books_dir) # FIXME: относительный п
 pages_urls = (
     '/', 'Index',
     '/('+__books_dir+'/.+)', 'StaticFiles',
+    '/news/(\\d+)', 'NewsPage',
     '/rss', 'NewsRSSFeed',
     '/upload', 'Upload',
     '/download', 'ManyDownloadPage',
@@ -89,6 +90,11 @@ class StaticFiles:
         while data:
             data = fd.read(1024)
             yield data
+
+class NewsPage:
+    def GET(self, newsid):
+        news = libdb.get_news(newsid)
+        return render.news(news)
 
 class BookPage:
     def GET(self, bookid):
