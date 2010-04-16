@@ -1270,7 +1270,7 @@ def file_update_filename(fileid, fn):
     _db.update('files', where='id = $fileid', filename=fn, vars=locals())
 
 def file_get_images(fileid, what='images'):
-    res = _db.select('files', locals(), where='fileid = $fileid',
+    res = _db.select('files', locals(), where='id = $fileid',
                      what=what)[0]
     images = pickle.loads(safestr(res[what]))
     return images
