@@ -93,11 +93,13 @@ def mime_type(path):
                           ).communicate()[0]
     return mt.strip()
 
-def book_filename(file, book):
+def book_filename(file, book, translit=False):
     '''генерирует имя файла транслитом'''
     def _conv(s):
         '''заменяет в строке пробелы на _ и преобразует её в транслит'''
-        return unidecode(u'_'.join(s.split()))
+        if translit:
+            return unidecode(u'_'.join(s.split()))
+        return s
     fn = []
     fn.append(_conv(book.authors[0].lastname))
     if book.sequences:
@@ -106,8 +108,11 @@ def book_filename(file, book):
         fn.append(str(seq.number))
     fn.append(_conv(book.title))
     fn.append(str(file.id))
-    fn = '_'.join(fn)
-    for c in '|?*<>":+[]':              # invalid chars in VFAT
+    if translit:
+        fn = '_'.join(fn)
+    else:
+        fn = ' '.join(fn)
+    for c in '\0|?*<>":+[]':              # invalid chars in VFAT
         fn = fn.replace(c, '')
     fn = fn[:245]
     return fn
