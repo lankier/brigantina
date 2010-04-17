@@ -11,6 +11,10 @@ from xml.sax.saxutils import escape
 import markdown
 from unidecode import unidecode
 import web
+try:
+    import Image
+except ImportError:
+    Image = None
 
 from config import xslt_dir, books_dir, log_file
 
@@ -179,6 +183,23 @@ def makedir(d):
     else:
         # TODO
         os.mkdir(os.path.join(books_dir, dir))
+
+def image_preview(filename):
+    '''генерирует и сохраняет preview изображения'''
+    max_w, max_h = 60.0, 100.0
+    if not Image:
+        return filename
+    root, ext = os.path.splitext(filename)
+    image_fn = root + '_thumb.jpg'
+    if os.path.exists(image_fn):
+        return image_fn
+    im = Image.open(filename).convert('RGBA')
+    w, h = im.size
+    zoom = max(w/max_w, h/max_h)
+    size = (int(w/zoom), int(h/zoom))
+    thumb = im.resize(size, Image.ANTIALIAS)
+    thumb.save(image_fn)
+    return image_fn
 
 if __name__ == '__main__':
     #ann = open('ann.fb2').read()

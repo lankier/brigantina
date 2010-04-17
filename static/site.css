@@ -102,6 +102,7 @@
 .bookdesc {
     margin-left: 0px;
     margin-bottom: 20px;
+    clear: both;
 }
 .bookdesc .annotation {
     margin-top: 0px;
@@ -111,4 +112,7 @@
     margin-top: 0px;
     margin-bottom: 0px;
 }
-
+.coverthumb {
+    float: left;
+    margin: 4px 6px 4px 0;
+}

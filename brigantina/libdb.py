@@ -503,6 +503,19 @@ def add_alttitles_to_book(book):
     alttitles = list(_db.select('alttitles', locals(), where='bookid = $book.id'))
     book.alttitles = alttitles
 
+def add_covers_to_book(book):
+    # добавляем обложки
+    if 'covers' in book and book.covers:
+        book.covers = pickle.loads(safestr(book.covers))
+    else:
+        book.covers = []
+    for f in book.files:
+        # обложки файлов
+        if f.covers:
+            for c in pickle.loads(safestr(f.covers)):
+                cover = web.Storage(fileid=f.id, filename=c)
+                book.covers.append(cover)
+
 def get_book(bookid, add_hidden_files=False):
     try:
         book = _db.select('books', locals(), where='id = $bookid')[0]
@@ -518,16 +531,7 @@ def get_book(bookid, add_hidden_files=False):
     else:
         book.annotation = ''
     # добавляем обложки
-    if 'covers' in book and book.covers:
-        book.covers = pickle.loads(safestr(book.covers))
-    else:
-        book.covers = []
-    for f in book.files:
-        # обложки файлов
-        if f.covers:
-            for c in pickle.loads(safestr(f.covers)):
-                cover = web.Storage(fileid=f.id, filename=c)
-                book.covers.append(cover)
+    add_covers_to_book(book)
     # добавляем переводчиков
     add_authors_to_book(book, 'bookstranslators')
     # другие имена
@@ -1373,6 +1377,7 @@ def get_new_books(page=None, limit=100, filter=None):
         add_genres_to_book(b)
         add_authors_to_book(b, limit=1)
         add_files_to_book(b)
+        add_covers_to_book(b)
     return newbooks, numpages
 
 def get_new_files(page=None, limit=100):

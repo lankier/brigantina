@@ -8,7 +8,7 @@ import web
 form = web.form
 
 from config import books_dir, confirm, host
-from utils import text2html, mime_type, book_filename, strsize
+from utils import text2html, mime_type, book_filename, strsize, image_preview
 import libdb
 from session import check_access, check_password, get_user, register_user, get_confirm_id, confirm_registration
 import addfile
@@ -711,6 +711,11 @@ class NewBooksPage:
         page = int(i.get('page', 1))
         prefs = libdb.get_user_prefs(session.username)
         newbooks, numpages = libdb.get_new_books(page-1, filter=prefs)
+        for b in newbooks:
+            if b.covers:
+                c = b.covers[0]
+                fn = os.path.join(books_dir, str(c.fileid), c.filename)
+                b.cover_thumb = image_preview(fn)
         return render.new_books(newbooks, page, numpages+1)
 
 class NewFilesPage:

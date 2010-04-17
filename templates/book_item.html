@@ -6,6 +6,9 @@ $# выводим книгу
 $if 'sequenceid' in book and book.sequenceid:
   $if book.sequencenumber:
     $(book.sequencenumber). \
+$# cover
+$if 'cover_thumb' in book and book.cover_thumb:
+  <div class="coverthumb"><img src="/$book.cover_thumb" /></div>
 <b><a href="/book/$book.id">$book.title</a></b>
 $# автор (один)
 $if 'authors' in book:
